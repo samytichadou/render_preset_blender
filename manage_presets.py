@@ -75,6 +75,12 @@ def get_dataset_from_collection(name, collection_property):
             dataset["properties"].append(propdatas)
     return dataset
 
+def check_preset_name_exists(name):
+    try:
+        bpy.context.window_manager.rndrp_presets[name]
+        return True
+    except KeyError:
+        return False
 
 class RNDRP_OT_create_render_preset(bpy.types.Operator):
     bl_idname = "rndrp.create_render_preset"
@@ -96,16 +102,23 @@ class RNDRP_OT_create_render_preset(bpy.types.Operator):
         return True
 
     def invoke(self, context, event):
+        # Reload presets
+        reload_presets()
         # Update of props
         get_render_properties(self.render_properties)
         return context.window_manager.invoke_props_dialog(self)
 
     def draw(self, context):
         layout = self.layout
-        layout.prop(self, "preset_name")
-        #TODO Check if name already exists and show warning
+
+        row = layout.row()
+        row.prop(self, "preset_name")
+        if check_preset_name_exists(self.preset_name):
+            row.label(text="", icon="ERROR")
+
         layout.prop(self, "categories", text="")
         col = layout.column(align=True)
+
         for prop in self.render_properties:
             if prop.parent_name == self.categories:
                 row = col.row(align=True)
@@ -158,6 +171,8 @@ def load_preset_datas(dataset):
         newprop.parent_name = prop["parent_name"]
 
 def reload_presets():
+    print("Render Preset --- Reloading presets")
+
     # Clear preset collection
     clear_preset_collection()
 
@@ -167,6 +182,8 @@ def reload_presets():
         dataset = read_json(filepath)
         load_preset_datas(dataset)
         print(f"Render Preset --- Loaded : {filepath}")
+
+    print("Render Preset --- Presets reloaded")
 
 class RNDRP_OT_reload_presets(bpy.types.Operator):
     bl_idname = "rndrp.reload_presets"
