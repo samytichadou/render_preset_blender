@@ -83,6 +83,26 @@ render_properties["scene.eevee"] = [
     "gtao_quality",
     "use_gtao_bent_normals",
     "use_gtao_bounce",
+
+    "bokeh_max_size",
+    "bokeh_threshold",
+    "bokeh_neighbor_max",
+    "bokeh_denoise_fac",
+    "use_bokeh_high_quality_slight_defocus",
+    "use_bokeh_jittered",
+    "bokeh_overblur",
+
+    "sss_samples",
+    "sss_jitter_threshold",
+
+    "shadow_cube_size",
+    "shadow_cascade_size",
+    "use_shadow_high_bitdepth",
+    "use_soft_shadows",
+    "light_threshold",
+
+    "use_overscan",
+    "overscan_size",
     ]
 
 # scene.view_settings
