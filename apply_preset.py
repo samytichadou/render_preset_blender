@@ -34,7 +34,7 @@ class RNDRP_OT_apply_preset(bpy.types.Operator):
     def execute(self, context):
         # Check if preset_name is valid
         try:
-            preset = context.window_manager.rndrp_presets[self.preset_name]
+            preset = context.window_manager.rndrp_properties.presets[self.preset_name]
         except KeyError:
             self.report({'WARNING'}, f"Preset {self.preset_name} not valid")
             return {"CANCELLED"}

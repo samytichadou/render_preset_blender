@@ -36,6 +36,12 @@ class RNDRP_PR_preset_collection(bpy.types.PropertyGroup):
         type=RNDRP_PR_render_properties,
         )
 
+class RNDRP_PR_general_properties(bpy.types.PropertyGroup):
+    presets : bpy.props.CollectionProperty(
+        type=RNDRP_PR_preset_collection,
+        )
+    active_preset_index : bpy.props.IntProperty()
+
 
 def get_object_from_parent_id(parent_name):
     parents = parent_name.split(".")
@@ -82,13 +88,13 @@ def get_dataset_from_collection(name, collection_property):
 
 def check_preset_name_exists(name):
     try:
-        bpy.context.window_manager.rndrp_presets[name]
+        bpy.context.window_manager.rndrp_properties.presets[name]
         return True
     except KeyError:
         return False
 
 class RNDRP_OT_create_render_preset(bpy.types.Operator):
-    bl_idname = "rndrp.create_render_preset"
+    bl_idname = "rndrp.create_preset"
     bl_label = "Create Render Preset"
 
     render_properties : bpy.props.CollectionProperty(
@@ -162,11 +168,11 @@ class RNDRP_OT_create_render_preset(bpy.types.Operator):
 
 
 def clear_preset_collection():
-    coll = bpy.context.window_manager.rndrp_presets
+    coll = bpy.context.window_manager.rndrp_properties.presets
     coll.clear()
 
 def load_preset_datas(dataset):
-    coll = bpy.context.window_manager.rndrp_presets
+    coll = bpy.context.window_manager.rndrp_properties.presets
     new = coll.add()
     new.name = dataset["name"]
 
@@ -217,11 +223,12 @@ def register():
     bpy.utils.register_class(RNDRP_PR_render_properties)
     bpy.utils.register_class(RNDRP_OT_create_render_preset)
     bpy.utils.register_class(RNDRP_PR_preset_collection)
+    bpy.utils.register_class(RNDRP_PR_general_properties)
     bpy.utils.register_class(RNDRP_OT_reload_presets)
-    bpy.types.WindowManager.rndrp_presets = \
-        bpy.props.CollectionProperty(
-            type = RNDRP_PR_preset_collection,
-            name="Render Presets",
+    bpy.types.WindowManager.rndrp_properties = \
+        bpy.props.PointerProperty(
+            type = RNDRP_PR_general_properties,
+            name="Render Presets Properties",
             )
     bpy.app.handlers.load_post.append(reload_preset_startup)
 
@@ -229,6 +236,7 @@ def unregister():
     bpy.utils.unregister_class(RNDRP_PR_render_properties)
     bpy.utils.unregister_class(RNDRP_OT_create_render_preset)
     bpy.utils.unregister_class(RNDRP_PR_preset_collection)
+    bpy.utils.unregister_class(RNDRP_PR_general_properties)
     bpy.utils.unregister_class(RNDRP_OT_reload_presets)
-    del bpy.types.WindowManager.rndrp_presets
+    del bpy.types.WindowManager.rndrp_properties
     bpy.app.handlers.load_post.remove(reload_preset_startup)
