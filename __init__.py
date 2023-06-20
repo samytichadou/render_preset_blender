@@ -40,6 +40,7 @@ bl_info = {
 from . import (
     addon_prefs,
     manage_presets,
+    apply_preset,
     )
 
 # register
@@ -48,8 +49,10 @@ from . import (
 def register():
     addon_prefs.register()
     manage_presets.register()
+    apply_preset.register()
 
 
 def unregister():
     addon_prefs.unregister()
     manage_presets.unregister()
+    apply_preset.unregister()
