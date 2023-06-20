@@ -166,6 +166,20 @@ class RNDRP_OT_create_render_preset(bpy.types.Operator):
 
         return {'FINISHED'}
 
+class RNDRP_OT_reload_presets(bpy.types.Operator):
+    bl_idname = "rndrp.reload_presets"
+    bl_label = "Reload Render Presets"
+
+    @classmethod
+    def poll(cls, context):
+        return True
+
+    def execute(self, context):
+        reload_presets()
+        self.report({'INFO'}, "Presets reloaded")
+
+        return {'FINISHED'}
+
 
 def clear_preset_collection():
     coll = bpy.context.window_manager.rndrp_properties.presets
@@ -198,19 +212,47 @@ def reload_presets():
 
     print("Render Preset --- Presets reloaded")
 
-class RNDRP_OT_reload_presets(bpy.types.Operator):
-    bl_idname = "rndrp.reload_presets"
-    bl_label = "Reload Render Presets"
+def remove_preset(collection, preset_name):
+    index = collection.presets.find(preset_name)
+
+    # Remove preset file
+    filepath = os.path.join(get_preset_folder(), f"{preset_name}.json")
+    if os.path.isfile(filepath):
+        os.remove(filepath)
+
+    # Remove preset entry
+    collection.presets.remove(index)
+    if collection.active_preset_index == index\
+    and index > 0:
+        collection.active_preset_index -= 1
+
+
+class RNDRP_OT_remove_preset(bpy.types.Operator):
+    bl_idname = "rndrp.remove_preset"
+    bl_label = "Remove Render Preset"
+    bl_options = {"INTERNAL"}
+
+    preset_name : bpy.props.StringProperty()
 
     @classmethod
     def poll(cls, context):
-        return True
+        return context.window_manager.rndrp_properties.presets
 
     def execute(self, context):
-        reload_presets()
-        self.report({'INFO'}, "Presets reloaded")
+        props = context.window_manager.rndrp_properties
+        # Check if preset_name is valid
+        try:
+            preset = props.presets[self.preset_name]
+        except KeyError:
+            self.report({'WARNING'}, f"Preset {self.preset_name} not valid")
+            return {"CANCELLED"}
+
+        remove_preset(props, self.preset_name)
+
+        self.report({'INFO'}, f"Preset {self.preset_name} removed")
 
         return {'FINISHED'}
+
 
 @persistent
 def reload_preset_startup(scene):
@@ -225,6 +267,7 @@ def register():
     bpy.utils.register_class(RNDRP_PR_preset_collection)
     bpy.utils.register_class(RNDRP_PR_general_properties)
     bpy.utils.register_class(RNDRP_OT_reload_presets)
+    bpy.utils.register_class(RNDRP_OT_remove_preset)
     bpy.types.WindowManager.rndrp_properties = \
         bpy.props.PointerProperty(
             type = RNDRP_PR_general_properties,
@@ -238,5 +281,6 @@ def unregister():
     bpy.utils.unregister_class(RNDRP_PR_preset_collection)
     bpy.utils.unregister_class(RNDRP_PR_general_properties)
     bpy.utils.unregister_class(RNDRP_OT_reload_presets)
+    bpy.utils.unregister_class(RNDRP_OT_remove_preset)
     del bpy.types.WindowManager.rndrp_properties
     bpy.app.handlers.load_post.remove(reload_preset_startup)
