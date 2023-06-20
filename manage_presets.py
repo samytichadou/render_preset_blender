@@ -238,6 +238,12 @@ class RNDRP_OT_remove_preset(bpy.types.Operator):
     def poll(cls, context):
         return context.window_manager.rndrp_properties.presets
 
+    def invoke(self, context, event):
+        return context.window_manager.invoke_props_dialog(self)
+
+    def draw(self, context):
+        self.layout.label(text="Are you sure ?")
+
     def execute(self, context):
         props = context.window_manager.rndrp_properties
         # Check if preset_name is valid
