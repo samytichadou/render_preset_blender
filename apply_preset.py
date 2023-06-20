@@ -17,12 +17,18 @@ def set_property_from_entry(entry):
 
     try:
         setattr(object, entry.name, value)
-    except KeyError:
-        print(f"Render Presets --- Unable to set {entry.name}")
+    except AttributeError:
+        print(f"Render Presets --- Unable to set {entry.parent_name}.{entry.name}")
+        return False
+
+    return True
 
 def apply_render_preset(preset):
+    check_missing = False
     for prop in preset.properties:
-        set_property_from_entry(prop)
+        if not set_property_from_entry(prop):
+            check_missing = True
+    return not check_missing
 
 class RNDRP_OT_apply_preset(bpy.types.Operator):
     bl_idname = "rndrp.apply_preset"
@@ -43,9 +49,10 @@ class RNDRP_OT_apply_preset(bpy.types.Operator):
             self.report({'WARNING'}, f"Preset {self.preset_name} not valid")
             return {"CANCELLED"}
 
-        apply_render_preset(preset)
-
-        self.report({'INFO'}, f"Preset {self.preset_name} applied")
+        if not apply_render_preset(preset):
+            self.report({'WARNING'}, f"Preset {self.preset_name} applied with missing properties, see console")
+        else:
+            self.report({'INFO'}, f"Preset {self.preset_name} applied")
 
         return {'FINISHED'}
 
