@@ -74,7 +74,7 @@ render_properties["scene.cycles"] = [
 
 # scene.eevee
 render_properties["scene.eevee"] = [
-    "taa_render_sample",
+    "taa_render_samples",
     "use_taa_reprojection",
 
     "use_gtao",
