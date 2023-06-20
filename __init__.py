@@ -1,3 +1,6 @@
+#TODO update UI quand changement preset
+#TODO op modification de preset
+
 '''
 Copyright (C) 2018 Samy Tichadou (tonton)
 samytichadou@gmail.com
@@ -18,7 +21,7 @@ Created by Samy Tichadou (tonton)
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-bl_info = {  
+bl_info = {
     "name": "Render Preset",
     "author": "Samy Tichadou (tonton)",
     "version": (1, 0, 0),
