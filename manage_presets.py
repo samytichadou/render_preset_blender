@@ -37,12 +37,15 @@ class RNDRP_PR_preset_collection(bpy.types.PropertyGroup):
         )
 
 
-def get_value_from_parent_id(parent_name, key):
+def get_object_from_parent_id(parent_name):
     parents = parent_name.split(".")
-    base_attr = bpy.context
+    object = bpy.context
     for p in parents:
-        base_attr = getattr(base_attr, p)
-    return getattr(base_attr, key)
+        object = getattr(object, p)
+    return object
+
+def get_value_from_parent_key(parent_name, key):
+    return getattr(get_object_from_parent_id(parent_name), key)
 
 def category_items_callback(scene, context):
     items = []
@@ -57,7 +60,7 @@ def get_render_properties(collection_property):
             new = collection_property.add()
             new.name = prop
             new.parent_name = cat
-            value = get_value_from_parent_id(cat, prop)
+            value = get_value_from_parent_key(cat, prop)
             new.value_string = str(value)
             new.value_type = type(value).__name__
             if prop in rp.render_properties_disabled:
@@ -150,6 +153,8 @@ class RNDRP_OT_create_render_preset(bpy.types.Operator):
             self.render_properties,
             )
         write_json_file(dataset, filepath)
+
+        reload_presets()
 
         self.report({'INFO'}, f"{self.preset_name} preset created")
 
