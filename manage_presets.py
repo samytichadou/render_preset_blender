@@ -136,8 +136,8 @@ class RNDRP_OT_create_render_preset(bpy.types.Operator):
                 row.prop(prop, "enabled", text="")
                 row.label(text=prop.name)
                 row.prop(prop, "value_string", text="")
-                row.separator()
-                row.label(text=prop.value_type)
+                # row.separator()
+                # row.label(text=prop.value_type)
 
     def execute(self, context):
         folder = get_preset_folder()
