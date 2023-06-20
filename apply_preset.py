@@ -24,6 +24,7 @@ def apply_render_preset(preset):
 class RNDRP_OT_apply_preset(bpy.types.Operator):
     bl_idname = "rndrp.apply_preset"
     bl_label = "Apply Render Preset"
+    bl_options = {"INTERNAL", "UNDO"}
 
     preset_name : bpy.props.StringProperty()
 
