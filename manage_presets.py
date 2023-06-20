@@ -21,19 +21,26 @@ def get_preset_folder():
         os.makedirs(folder)
     return folder
 
+
+class RNDRP_PR_render_properties(bpy.types.PropertyGroup):
+    """A bpy.types.PropertyGroup descendant for bpy.props.CollectionProperty"""
+    enabled : bpy.props.BoolProperty(default=True)
+    value_string : bpy.props.StringProperty()
+    value_type : bpy.props.StringProperty()
+    parent_name : bpy.props.StringProperty()
+
+class RNDRP_PR_preset_collection(bpy.types.PropertyGroup):
+    properties : bpy.props.CollectionProperty(
+        type=RNDRP_PR_render_properties,
+        )
+
+
 def get_value_from_parent_id(parent_name, key):
     parents = parent_name.split(".")
     base_attr = bpy.context
     for p in parents:
         base_attr = getattr(base_attr, p)
     return getattr(base_attr, key)
-
-class RNDRP_PR_TemporaryProperties(bpy.types.PropertyGroup):
-    """A bpy.types.PropertyGroup descendant for bpy.props.CollectionProperty"""
-    enabled : bpy.props.BoolProperty(default=True)
-    value_string : bpy.props.StringProperty()
-    value_type : bpy.props.StringProperty()
-    parent_name : bpy.props.StringProperty()
 
 def category_items_callback(scene, context):
     items = []
@@ -73,8 +80,8 @@ class RNDRP_OT_create_render_preset(bpy.types.Operator):
     bl_idname = "rndrp.create_render_preset"
     bl_label = "Create Render Preset"
 
-    collection : bpy.props.CollectionProperty(
-        type=RNDRP_PR_TemporaryProperties,
+    render_properties : bpy.props.CollectionProperty(
+        type=RNDRP_PR_render_properties,
         )
     categories : bpy.props.EnumProperty(
         items = category_items_callback,
@@ -86,11 +93,11 @@ class RNDRP_OT_create_render_preset(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return context.active_object is not None
+        return True
 
     def invoke(self, context, event):
         # Update of props
-        get_render_properties(self.collection)
+        get_render_properties(self.render_properties)
         return context.window_manager.invoke_props_dialog(self)
 
     def draw(self, context):
@@ -99,7 +106,7 @@ class RNDRP_OT_create_render_preset(bpy.types.Operator):
         #TODO Check if name already exists and show warning
         layout.prop(self, "categories", text="")
         col = layout.column(align=True)
-        for prop in self.collection:
+        for prop in self.render_properties:
             if prop.parent_name == self.categories:
                 row = col.row(align=True)
                 row.prop(prop, "enabled", text="")
@@ -125,7 +132,7 @@ class RNDRP_OT_create_render_preset(bpy.types.Operator):
 
         dataset = get_dataset_from_collection(
             self.preset_name,
-            self.collection,
+            self.render_properties,
             )
         write_json_file(dataset, filepath)
 
@@ -133,10 +140,63 @@ class RNDRP_OT_create_render_preset(bpy.types.Operator):
 
         return {'FINISHED'}
 
+
+def clear_preset_collection():
+    coll = bpy.context.window_manager.rndrp_presets
+    coll.clear()
+
+def load_preset_datas(dataset):
+    coll = bpy.context.window_manager.rndrp_presets
+    new = coll.add()
+    new.name = dataset["name"]
+
+    for prop in dataset["properties"]:
+        newprop = new.properties.add()
+        newprop.name = prop["name"]
+        newprop.value_string = prop["value_string"]
+        newprop.value_type = prop["value_type"]
+        newprop.parent_name = prop["parent_name"]
+
+def reload_presets():
+    # Clear preset collection
+    clear_preset_collection()
+
+    folder = get_preset_folder()
+    for f in os.listdir(folder):
+        filepath = os.path.join(folder, f)
+        dataset = read_json(filepath)
+        load_preset_datas(dataset)
+        print(f"Render Preset --- Loaded : {filepath}")
+
+class RNDRP_OT_reload_presets(bpy.types.Operator):
+    bl_idname = "rndrp.reload_presets"
+    bl_label = "Reload Render Presets"
+
+    @classmethod
+    def poll(cls, context):
+        return True
+
+    def execute(self, context):
+        reload_presets()
+        self.report({'INFO'}, "Presets reloaded")
+
+        return {'FINISHED'}
+
+
 ### REGISTER ---
 def register():
-    bpy.utils.register_class(RNDRP_PR_TemporaryProperties)
+    bpy.utils.register_class(RNDRP_PR_render_properties)
     bpy.utils.register_class(RNDRP_OT_create_render_preset)
+    bpy.utils.register_class(RNDRP_PR_preset_collection)
+    bpy.utils.register_class(RNDRP_OT_reload_presets)
+    bpy.types.WindowManager.rndrp_presets = \
+        bpy.props.CollectionProperty(
+            type = RNDRP_PR_preset_collection,
+            name="Render Presets",
+            )
 def unregister():
-    bpy.utils.unregister_class(RNDRP_PR_TemporaryProperties)
+    bpy.utils.unregister_class(RNDRP_PR_render_properties)
     bpy.utils.unregister_class(RNDRP_OT_create_render_preset)
+    bpy.utils.unregister_class(RNDRP_PR_preset_collection)
+    bpy.utils.unregister_class(RNDRP_OT_reload_presets)
+    del bpy.types.WindowManager.rndrp_presets
