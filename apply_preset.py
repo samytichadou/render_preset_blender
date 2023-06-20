@@ -29,7 +29,7 @@ class RNDRP_OT_apply_preset(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return True
+        return context.window_manager.rndrp_properties.presets
 
     def execute(self, context):
         # Check if preset_name is valid
