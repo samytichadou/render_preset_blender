@@ -15,7 +15,10 @@ def set_property_from_entry(entry):
     elif entry.value_type=="float":
         value = float(value)
 
-    setattr(object, entry.name, value)
+    try:
+        setattr(object, entry.name, value)
+    except Keyerror:
+        print("Render Presets --- Unable to set {entry.name}")
 
 def apply_render_preset(preset):
     for prop in preset.properties:

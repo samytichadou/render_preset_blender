@@ -47,11 +47,18 @@ def get_object_from_parent_id(parent_name):
     parents = parent_name.split(".")
     object = bpy.context
     for p in parents:
-        object = getattr(object, p)
+        try:
+            object = getattr(object, p)
+        except Keyerror:
+            print("Render Presets --- Unable to get {parent_name}")
+            return None
     return object
 
 def get_value_from_parent_key(parent_name, key):
-    return getattr(get_object_from_parent_id(parent_name), key)
+    object = get_object_from_parent_id(parent_name)
+    if object is None:
+        return None
+    return getattr(object, key)
 
 def category_items_callback(scene, context):
     items = []
@@ -63,14 +70,15 @@ def get_render_properties(collection_property):
     collection_property.clear()
     for cat in rp.render_properties:
         for prop in rp.render_properties[cat]:
-            new = collection_property.add()
-            new.name = prop
-            new.parent_name = cat
             value = get_value_from_parent_key(cat, prop)
-            new.value_string = str(value)
-            new.value_type = type(value).__name__
-            if prop in rp.render_properties_disabled:
-                new.enabled = False
+            if value is not None:
+                new = collection_property.add()
+                new.name = prop
+                new.parent_name = cat
+                new.value_string = str(value)
+                new.value_type = type(value).__name__
+                if prop in rp.render_properties_disabled:
+                    new.enabled = False
 
 def get_dataset_from_collection(name, collection_property):
     dataset = {}
