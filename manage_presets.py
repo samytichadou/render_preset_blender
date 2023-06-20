@@ -49,8 +49,8 @@ def get_object_from_parent_id(parent_name):
     for p in parents:
         try:
             object = getattr(object, p)
-        except Keyerror:
-            print("Render Presets --- Unable to get {parent_name}")
+        except AttributeError:
+            print(f"Render Presets --- Unable to get {parent_name}")
             return None
     return object
 
@@ -138,14 +138,18 @@ class RNDRP_OT_create_render_preset(bpy.types.Operator):
         layout.prop(self, "categories", text="")
         col = layout.column(align=True)
 
+        chk_missing = True
         for prop in self.render_properties:
             if prop.parent_name == self.categories:
+                chk_missing = False
                 row = col.row(align=True)
                 row.prop(prop, "enabled", text="")
                 row.label(text=prop.name)
                 row.prop(prop, "value_string", text="")
                 # row.separator()
                 # row.label(text=prop.value_type)
+        if chk_missing:
+            col.label(text=f"Missing Attribute : {self.categories}")
 
     def execute(self, context):
         folder = get_preset_folder()

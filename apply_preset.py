@@ -17,8 +17,8 @@ def set_property_from_entry(entry):
 
     try:
         setattr(object, entry.name, value)
-    except Keyerror:
-        print("Render Presets --- Unable to set {entry.name}")
+    except KeyError:
+        print(f"Render Presets --- Unable to set {entry.name}")
 
 def apply_render_preset(preset):
     for prop in preset.properties:
