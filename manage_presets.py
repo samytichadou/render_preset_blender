@@ -1,4 +1,6 @@
 import bpy
+from bpy.app.handlers import persistent
+
 import os
 import json
 
@@ -199,6 +201,11 @@ class RNDRP_OT_reload_presets(bpy.types.Operator):
 
         return {'FINISHED'}
 
+@persistent
+def reload_preset_startup(scene):
+    print("Render Preset --- Startup handler")
+    reload_presets()
+
 
 ### REGISTER ---
 def register():
@@ -211,9 +218,12 @@ def register():
             type = RNDRP_PR_preset_collection,
             name="Render Presets",
             )
+    bpy.app.handlers.load_post.append(reload_preset_startup)
+
 def unregister():
     bpy.utils.unregister_class(RNDRP_PR_render_properties)
     bpy.utils.unregister_class(RNDRP_OT_create_render_preset)
     bpy.utils.unregister_class(RNDRP_PR_preset_collection)
     bpy.utils.unregister_class(RNDRP_OT_reload_presets)
     del bpy.types.WindowManager.rndrp_presets
+    bpy.app.handlers.load_post.remove(reload_preset_startup)
