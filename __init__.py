@@ -1,4 +1,3 @@
-#TODO update UI quand changement preset
 #TODO op modification de preset
 
 '''

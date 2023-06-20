@@ -174,6 +174,10 @@ class RNDRP_OT_create_render_preset(bpy.types.Operator):
 
         reload_presets()
 
+        # Refresh UI
+        for area in context.screen.areas:
+            area.tag_redraw()
+
         self.report({'INFO'}, f"{self.preset_name} preset created")
 
         return {'FINISHED'}
@@ -188,6 +192,11 @@ class RNDRP_OT_reload_presets(bpy.types.Operator):
 
     def execute(self, context):
         reload_presets()
+
+        # Refresh UI
+        for area in context.screen.areas:
+            area.tag_redraw()
+
         self.report({'INFO'}, "Presets reloaded")
 
         return {'FINISHED'}
@@ -266,6 +275,10 @@ class RNDRP_OT_remove_preset(bpy.types.Operator):
             return {"CANCELLED"}
 
         remove_preset(props, self.preset_name)
+
+        # Refresh UI
+        for area in context.screen.areas:
+            area.tag_redraw()
 
         self.report({'INFO'}, f"Preset {self.preset_name} removed")
 
