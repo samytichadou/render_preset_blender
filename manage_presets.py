@@ -123,7 +123,7 @@ class RNDRP_OT_create_render_preset(bpy.types.Operator):
         layout = self.layout
 
         row = layout.row()
-        row.prop(self, "preset_name")
+        row.prop(self, "preset_name", text="Name")
         if check_preset_name_exists(self.preset_name):
             row.label(text="", icon="ERROR")
 
