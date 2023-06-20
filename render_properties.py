@@ -72,6 +72,19 @@ render_properties["scene.cycles"] = [
     "samples"
     ]
 
+# scene.eevee
+render_properties["scene.eevee"] = [
+    "taa_render_sample",
+    "use_taa_reprojection",
+
+    "use_gtao",
+    "gtao_distance",
+    "gtao_factor",
+    "gtao_quality",
+    "use_gtao_bent_normals",
+    "use_gtao_bounce",
+    ]
+
 # scene.view_settings
 render_properties["scene.view_settings"] = [
     "view_transform",
