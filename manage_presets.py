@@ -328,7 +328,7 @@ class RNDRP_OT_modify_render_preset(bpy.types.Operator):
         filepath = os.path.join(folder, f"{self.preset.name}.json")
 
         dataset = get_dataset_from_collection(
-            self.preset.name,
+            self.temporary_name,
             self.render_properties,
             )
 
