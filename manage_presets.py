@@ -66,7 +66,7 @@ def category_items_callback(scene, context):
         items.append((k, k, ""))
     return items
 
-def get_render_properties(collection_property):
+def get_render_properties(collection_property, disable_prop=False):
     collection_property.clear()
     for cat in rp.render_properties:
         for prop in rp.render_properties[cat]:
@@ -77,6 +77,9 @@ def get_render_properties(collection_property):
                 new.parent_name = cat
                 new.value_string = str(value)
                 new.value_type = type(value).__name__
+                if disable_prop:
+                    new.enabled = False
+                    continue
                 if prop in rp.render_properties_disabled:
                     new.enabled = False
 
@@ -179,6 +182,149 @@ class RNDRP_OT_create_render_preset(bpy.types.Operator):
             area.tag_redraw()
 
         self.report({'INFO'}, f"{self.preset_name} preset created")
+
+        return {'FINISHED'}
+
+def get_render_properties_from_preset(collection, preset):
+    for prop in preset.properties:
+        try:
+            # If prop already exists
+            new_prop = collection[prop.name]
+            new_prop.value_string = prop.value_string
+            new_prop.enabled = True
+        except KeyError:
+            new_prop = collection.add()
+            new_prop.name = prop.name
+            new_prop.parent_name = prop.parent_name
+            new_prop.value_string = prop.value_string
+            new_prop.value_type = prop.value_type
+            new_prop.enabled = True
+
+def modify_category_items_callback(scene, context):
+    cat = []
+    items = []
+
+    for k in rp.render_properties:
+        cat.append(k)
+
+    props = context.window_manager.rndrp_properties
+    preset = props.presets[props.active_preset_index]
+    for prop in preset.properties:
+        if prop.parent_name not in cat:
+            cat.append(prop.parent_name)
+
+    for prop in cat:
+        items.append((prop, prop, ""))
+
+    return items
+
+def check_active_preset():
+    props = bpy.context.window_manager.rndrp_properties
+    return props.active_preset_index in range(0,len(props.presets))
+
+class RNDRP_OT_modify_render_preset(bpy.types.Operator):
+    bl_idname = "rndrp.modify_preset"
+    bl_label = "Modify Render Preset"
+
+    render_properties : bpy.props.CollectionProperty(
+        type=RNDRP_PR_render_properties,
+        )
+    categories : bpy.props.EnumProperty(
+        items = modify_category_items_callback,
+        )
+    temporary_name : bpy.props.StringProperty(
+        name = "Preset Name",
+        )
+
+    preset = None
+
+    @classmethod
+    def poll(cls, context):
+        return check_active_preset()
+
+    def invoke(self, context, event):
+        # Check for valid folder
+        folder = get_preset_folder()
+        if not os.path.isdir(folder):
+            self.report({'WARNING'}, "Invalid Preset Folder, check addon preferences")
+            #TODO Cancel operator
+
+        # Check if preset_name is valid
+        props = context.window_manager.rndrp_properties
+        try:
+            self.preset = props.presets[props.active_preset_index]
+        except KeyError:
+            self.report({'WARNING'}, "Preset not valid")
+            #TODO Cancel operator
+
+        # Check if preset file exists
+        filepath = os.path.join(folder, f"{self.preset.name}.json")
+        if not os.path.isfile(filepath):
+            self.report({'WARNING'}, "Invalid Preset File")
+            #TODO Cancel operator
+
+        self.temporary_name = self.preset.name
+
+        # Reload presets
+        reload_presets()
+
+        # Update of props
+        get_render_properties(self.render_properties, disable_prop = True)
+        # Get props from existing preset
+        get_render_properties_from_preset(self.render_properties, self.preset)
+
+        return context.window_manager.invoke_props_dialog(self)
+
+    def draw(self, context):
+        layout = self.layout
+
+        row = layout.row()
+        row.prop(self, "temporary_name", text="Name")
+        if check_preset_name_exists(self.temporary_name)\
+        and self.temporary_name != self.preset.name:
+            row.label(text="", icon="ERROR")
+
+        layout.prop(self, "categories", text="")
+        col = layout.column(align=True)
+
+        chk_missing = True
+        for prop in self.render_properties:
+            if prop.parent_name == self.categories\
+            or (prop.parent_name not in rp.render_properties and self.categories == "Others"):
+                chk_missing = False
+                row = col.row(align=True)
+                row.prop(prop, "enabled", text="")
+                row.label(text=prop.name)
+                row.prop(prop, "value_string", text="")
+                # row.separator()
+                # row.label(text=prop.value_type)
+        if chk_missing:
+            col.label(text=f"Missing Attribute : {self.categories}")
+
+    def execute(self, context):
+        folder = get_preset_folder()
+
+        filepath = os.path.join(folder, f"{self.preset.name}.json")
+
+        dataset = get_dataset_from_collection(
+            self.preset.name,
+            self.render_properties,
+            )
+
+        # Remove old file if needed
+        if self.preset.name != self.temporary_name:
+            os.remove(filepath)
+            filepath = os.path.join(folder, f"{self.temporary_name}.json"
+                                    )
+        write_json_file(dataset, filepath)
+
+        reload_presets()
+
+        # Refresh UI
+        for area in context.screen.areas:
+            area.tag_redraw()
+
+        self.report({'INFO'}, f"{self.temporary_name} preset modified")
 
         return {'FINISHED'}
 
@@ -295,6 +441,7 @@ def reload_preset_startup(scene):
 def register():
     bpy.utils.register_class(RNDRP_PR_render_properties)
     bpy.utils.register_class(RNDRP_OT_create_render_preset)
+    bpy.utils.register_class(RNDRP_OT_modify_render_preset)
     bpy.utils.register_class(RNDRP_PR_preset_collection)
     bpy.utils.register_class(RNDRP_PR_general_properties)
     bpy.utils.register_class(RNDRP_OT_reload_presets)
@@ -309,6 +456,7 @@ def register():
 def unregister():
     bpy.utils.unregister_class(RNDRP_PR_render_properties)
     bpy.utils.unregister_class(RNDRP_OT_create_render_preset)
+    bpy.utils.unregister_class(RNDRP_OT_modify_render_preset)
     bpy.utils.unregister_class(RNDRP_PR_preset_collection)
     bpy.utils.unregister_class(RNDRP_PR_general_properties)
     bpy.utils.unregister_class(RNDRP_OT_reload_presets)
