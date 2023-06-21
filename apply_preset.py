@@ -42,7 +42,7 @@ class RNDRP_OT_apply_preset(bpy.types.Operator):
         return mp.check_active_preset()
 
     def execute(self, context):
-        reload_presets()
+        mp.reload_presets()
 
         # Check if preset_name is valid
         props = context.window_manager.rndrp_properties
