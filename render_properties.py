@@ -40,6 +40,9 @@ render_properties["scene.render"] = [
     "use_stamp_sequencer_strip",
 
     "film_transparent",
+
+    "use_freestyle",
+    "line_thickness_mode",
     ]
 
 # scene.render.image_settings
@@ -108,6 +111,14 @@ render_properties["scene.eevee"] = [
 # scene.view_settings
 render_properties["scene.view_settings"] = [
     "view_transform",
+    "look",
+    "exposure",
+    "gamma",
+    ]
+
+# scene.grease_pencil_settings
+render_properties["scene.grease_pencil_settings"] = [
+    "antialias_threshold",
     ]
 
 # scene.cgru
