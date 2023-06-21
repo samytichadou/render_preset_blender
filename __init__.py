@@ -1,4 +1,3 @@
-#TODO Organize prop op panel when too much props
 #TODO Add all render... props programmatically
 #TODO Get prop name for UI
 '''

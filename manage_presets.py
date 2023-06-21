@@ -126,10 +126,11 @@ class RNDRP_OT_create_render_preset(bpy.types.Operator):
     def invoke(self, context, event):
         # Reload presets
         reload_presets()
+
         # Update of props
         get_render_properties(self.render_properties)
-        #TODO correct panel size
-        return context.window_manager.invoke_props_dialog(self)
+
+        return context.window_manager.invoke_props_dialog(self, width=600)
 
     def draw(self, context):
         layout = self.layout
@@ -141,7 +142,8 @@ class RNDRP_OT_create_render_preset(bpy.types.Operator):
 
         layout.prop(self, "categories", text="")
         split = layout.split()
-        col = split.column(align=True)
+        col1 = split.column(align=True)
+        col2 = split.column(align=True)
 
         chk_missing = True
         n = 0
@@ -151,11 +153,11 @@ class RNDRP_OT_create_render_preset(bpy.types.Operator):
 
                 # Get right column
                 n += 1
-                #TODO programmatically get every 15
-                if n in {20, 39}:
-                    col = split.column(align=True)
+                if n < 20:
+                    row = col1.row(align=True)
+                else:
+                    row = col2.row(align=True)
 
-                row = col.row(align=True)
                 row.prop(prop, "enabled", text="")
                 row.label(text=prop.name)
                 row.prop(prop, "value_string", text="")
@@ -281,7 +283,7 @@ class RNDRP_OT_modify_render_preset(bpy.types.Operator):
         # Get props from existing preset
         get_render_properties_from_preset(self.render_properties, self.preset)
 
-        return context.window_manager.invoke_props_dialog(self)
+        return context.window_manager.invoke_props_dialog(self, width=600)
 
     def draw(self, context):
         layout = self.layout
@@ -293,14 +295,25 @@ class RNDRP_OT_modify_render_preset(bpy.types.Operator):
             row.label(text="", icon="ERROR")
 
         layout.prop(self, "categories", text="")
-        col = layout.column(align=True)
+        split = layout.split()
+        col1 = split.column(align=True)
+        col2 = split.column(align=True)
 
         chk_missing = True
+        n = 0
         for prop in self.render_properties:
             if prop.parent_name == self.categories\
             or (prop.parent_name not in rp.render_properties and self.categories == "Others"):
                 chk_missing = False
-                row = col.row(align=True)
+
+                # Get right column
+                n += 1
+                #TODO programmatically get every 15
+                if n < 20:
+                    row = col1.row(align=True)
+                else:
+                    row = col2.row(align=True)
+
                 row.prop(prop, "enabled", text="")
                 row.label(text=prop.name)
                 row.prop(prop, "value_string", text="")
