@@ -44,20 +44,10 @@ class RNDRP_PT_render_presets(bpy.types.Panel):
         col.operator("rndrp.reload_presets", icon='FILE_REFRESH', text="")
         col.separator()
         col.operator("rndrp.create_preset", icon='ADD', text="")
-
-        sub = col.column(align=True)
-        op1 = sub.operator("rndrp.remove_preset", icon='REMOVE', text="")
-        sub.separator()
-        op2 = sub.operator("rndrp.apply_preset", icon="CHECKMARK", text="")
+        col.operator("rndrp.remove_preset", icon='REMOVE', text="")
+        col.separator()
+        col.operator("rndrp.apply_preset", icon="CHECKMARK", text="")
         col.operator("rndrp.modify_preset", icon="GREASEPENCIL", text="")
-
-        # Deal with active preset or not
-        if props.active_preset_index in range(0,len(props.presets)):
-            active_preset = props.presets[props.active_preset_index]
-            op1.preset_name = active_preset.name
-            op2.preset_name = active_preset.name
-        else:
-            sub.enabled = False
 
 
 ### REGISTER ---

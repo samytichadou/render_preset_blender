@@ -35,24 +35,25 @@ class RNDRP_OT_apply_preset(bpy.types.Operator):
     bl_label = "Apply Render Preset"
     bl_options = {"INTERNAL", "UNDO"}
 
-    preset_name : bpy.props.StringProperty()
+    preset = None
 
     @classmethod
     def poll(cls, context):
-        return context.window_manager.rndrp_properties.presets
+        return mp.check_active_preset()
 
     def execute(self, context):
         # Check if preset_name is valid
+        props = context.window_manager.rndrp_properties
         try:
-            preset = context.window_manager.rndrp_properties.presets[self.preset_name]
+            self.preset = props.presets[props.active_preset_index]
         except KeyError:
-            self.report({'WARNING'}, f"Preset {self.preset_name} not valid")
+            self.report({'WARNING'}, "Preset not valid")
             return {"CANCELLED"}
 
-        if not apply_render_preset(preset):
-            self.report({'WARNING'}, f"Preset {self.preset_name} applied with missing properties, see console")
+        if not apply_render_preset(self.preset):
+            self.report({'WARNING'}, f"Preset : {self.preset.name} applied with missing properties, see console")
         else:
-            self.report({'INFO'}, f"Preset {self.preset_name} applied")
+            self.report({'INFO'}, f"Preset : {self.preset.name} applied")
 
         return {'FINISHED'}
 

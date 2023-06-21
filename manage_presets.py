@@ -235,7 +235,6 @@ class RNDRP_OT_modify_render_preset(bpy.types.Operator):
     temporary_name : bpy.props.StringProperty(
         name = "Preset Name",
         )
-
     preset = None
 
     @classmethod
@@ -247,7 +246,7 @@ class RNDRP_OT_modify_render_preset(bpy.types.Operator):
         folder = get_preset_folder()
         if not os.path.isdir(folder):
             self.report({'WARNING'}, "Invalid Preset Folder, check addon preferences")
-            #TODO Cancel operator
+            return {'CANCELLED'}
 
         # Check if preset_name is valid
         props = context.window_manager.rndrp_properties
@@ -255,13 +254,13 @@ class RNDRP_OT_modify_render_preset(bpy.types.Operator):
             self.preset = props.presets[props.active_preset_index]
         except KeyError:
             self.report({'WARNING'}, "Preset not valid")
-            #TODO Cancel operator
+            return {'CANCELLED'}
 
         # Check if preset file exists
         filepath = os.path.join(folder, f"{self.preset.name}.json")
         if not os.path.isfile(filepath):
             self.report({'WARNING'}, "Invalid Preset File")
-            #TODO Cancel operator
+            return {'CANCELLED'}
 
         self.temporary_name = self.preset.name
 
@@ -400,33 +399,36 @@ class RNDRP_OT_remove_preset(bpy.types.Operator):
     bl_options = {"INTERNAL"}
 
     preset_name : bpy.props.StringProperty()
+    preset = None
 
     @classmethod
     def poll(cls, context):
-        return context.window_manager.rndrp_properties.presets
+        return check_active_preset()
 
     def invoke(self, context, event):
+        # Check if preset_name is valid
+        props = context.window_manager.rndrp_properties
+        try:
+            self.preset = props.presets[props.active_preset_index]
+        except KeyError:
+            self.report({'WARNING'}, "Preset not valid")
+            return {'CANCELLED'}
         return context.window_manager.invoke_props_dialog(self)
 
     def draw(self, context):
-        self.layout.label(text="Are you sure ?")
+        layout = self.layout
+        layout.label(text=f"Removing : {self.preset.name}")
+        layout.label(text="Are you sure ?")
 
     def execute(self, context):
         props = context.window_manager.rndrp_properties
-        # Check if preset_name is valid
-        try:
-            preset = props.presets[self.preset_name]
-        except KeyError:
-            self.report({'WARNING'}, f"Preset {self.preset_name} not valid")
-            return {"CANCELLED"}
-
-        remove_preset(props, self.preset_name)
+        remove_preset(props, self.preset.name)
 
         # Refresh UI
         for area in context.screen.areas:
             area.tag_redraw()
 
-        self.report({'INFO'}, f"Preset {self.preset_name} removed")
+        self.report({'INFO'}, f"Preset {self.preset.name} removed")
 
         return {'FINISHED'}
 
