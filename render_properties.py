@@ -1,142 +1,77 @@
-render_properties = {}
+# Categories to look for render properties
+render_properties = [
+    "scene.render",
+    "scene.render.image_settings",
+    "scene.cycles",
+    "scene.eevee",
+    "scene.view_settings",
+    "scene.grease_pencil_settings",
+    "scene.cgru",
+    ]
 
-# scene.render
-render_properties["scene.render"] = [
+# Properties to avoid
+render_properties_avoided = [
+    # scene.cgru
+    "adv_options",
+    ]
+
+# Enabled by default
+render_properties_enabled = [
+    # scene.render
     "engine",
-
     "resolution_x",
     "resolution_y",
     "resolution_percentage",
-    "pixel_aspect_x",
-    "pixel_aspect_y",
-
-    "use_border",
-    "use_crop_to_border",
-
-    "fps",
-    "fps_base",
-
     "use_file_extension",
-    "use_render_cache",
-
     "use_overwrite",
     "use_placeholder",
-
     "use_simplify",
-
     "use_stamp",
     "use_stamp_date",
     "use_stamp_time",
     "use_stamp_render_time",
     "use_stamp_frame",
-    "use_stamp_frame_range",
     "use_stamp_memory",
     "use_stamp_hostname",
-    "use_stamp_camera",
-    "use_stamp_lens",
-    "use_stamp_scene",
-    "use_stamp_marker",
     "use_stamp_filename",
-    "use_stamp_sequencer_strip",
-
     "film_transparent",
-
     "use_freestyle",
-    "line_thickness_mode",
-    ]
 
-# scene.render.image_settings
-render_properties["scene.render.image_settings"] = [
+    # scene.render.image_settings
     "file_format",
     "color_mode",
     "compression",
     "color_depth",
     "quality",
-    #TODO Formats details (video...)
-    ]
 
-# scene.cycles
-render_properties["scene.cycles"] = [
+    # scene.cycles
     "device",
     "feature_set",
-
     "dicing_rate",
-
     "use_denoising",
     "denoiser",
-    "adaptive_threshold",
-
     "use_auto_tile",
     "tile_size",
-
     "caustics_reflective",
     "caustics_refractive",
+    "samples",
 
-    "samples"
-    ]
-
-# scene.eevee
-render_properties["scene.eevee"] = [
-    "taa_render_samples",
+    # scene.eevee
+    "aa_render_samples",
     "use_taa_reprojection",
-
     "use_gtao",
-    "gtao_distance",
-    "gtao_factor",
-    "gtao_quality",
-    "use_gtao_bent_normals",
-    "use_gtao_bounce",
-
-    "bokeh_max_size",
-    "bokeh_threshold",
-    "bokeh_neighbor_max",
-    "bokeh_denoise_fac",
-    "use_bokeh_high_quality_slight_defocus",
-    "use_bokeh_jittered",
-    "bokeh_overblur",
-
     "sss_samples",
-    "sss_jitter_threshold",
-
-    "shadow_cube_size",
-    "shadow_cascade_size",
-    "use_shadow_high_bitdepth",
-    "use_soft_shadows",
-    "light_threshold",
-
     "use_overscan",
     "overscan_size",
-    ]
 
-# scene.view_settings
-render_properties["scene.view_settings"] = [
+    # scene.view_settings
     "view_transform",
     "look",
-    "exposure",
-    "gamma",
-    ]
 
-# scene.grease_pencil_settings
-render_properties["scene.grease_pencil_settings"] = [
+    # scene.grease_pencil_settings
     "antialias_threshold",
-    ]
 
-# scene.cgru
-render_properties["scene.cgru"] = [
+    # scene.cgru
     "fpertask",
     "priority",
-    ]
-
-# Disabled by default
-render_properties_disabled = [
-    "pixel_aspect_x",
-    "pixel_aspect_y",
-
-    "use_border",
-    "use_crop_to_border",
-
-    "fps",
-    "fps_base",
-
-    "use_render_cache",
     ]

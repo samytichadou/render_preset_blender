@@ -26,7 +26,7 @@ def get_preset_folder():
 
 class RNDRP_PR_render_properties(bpy.types.PropertyGroup):
     """A bpy.types.PropertyGroup descendant for bpy.props.CollectionProperty"""
-    enabled : bpy.props.BoolProperty(default=True)
+    enabled : bpy.props.BoolProperty()
     value_string : bpy.props.StringProperty()
     value_type : bpy.props.StringProperty()
     parent_name : bpy.props.StringProperty()
@@ -69,19 +69,20 @@ def category_items_callback(scene, context):
 def get_render_properties(collection_property, disable_prop=False):
     collection_property.clear()
     for cat in rp.render_properties:
-        for prop in rp.render_properties[cat]:
-            value = get_value_from_parent_key(cat, prop)
-            if value is not None:
+        parent = get_object_from_parent_id(cat)
+        for name, value in parent.rna_type.properties.items():
+            value = get_value_from_parent_key(cat, name)
+            if value is not None\
+            and name not in rp.render_properties_avoided\
+            and type(value).__name__ in {"int","str","float","bool"}:
                 new = collection_property.add()
-                new.name = prop
+                new.name = name
                 new.parent_name = cat
                 new.value_string = str(value)
                 new.value_type = type(value).__name__
-                if disable_prop:
-                    new.enabled = False
-                    continue
-                if prop in rp.render_properties_disabled:
-                    new.enabled = False
+
+                if not disable_prop and name in rp.render_properties_enabled:
+                    new.enabled = True
 
 def get_dataset_from_collection(name, collection_property):
     dataset = {}
@@ -118,6 +119,10 @@ class RNDRP_OT_create_render_preset(bpy.types.Operator):
         name = "Preset Name",
         default = "New Preset",
         )
+    hide_unused_properties : bpy.props.BoolProperty(
+        name = "Hide Unused Properties",
+        default = True,
+        )
 
     @classmethod
     def poll(cls, context):
@@ -130,7 +135,7 @@ class RNDRP_OT_create_render_preset(bpy.types.Operator):
         # Update of props
         get_render_properties(self.render_properties)
 
-        return context.window_manager.invoke_props_dialog(self, width=600)
+        return context.window_manager.invoke_props_dialog(self)#, width=1400)
 
     def draw(self, context):
         layout = self.layout
@@ -140,29 +145,25 @@ class RNDRP_OT_create_render_preset(bpy.types.Operator):
         if check_preset_name_exists(self.preset_name):
             row.label(text="", icon="ERROR")
 
-        layout.prop(self, "categories", text="")
-        split = layout.split()
-        col1 = split.column(align=True)
-        col2 = split.column(align=True)
+        row = layout.row()
+        row.prop(self, "categories", text="")
+        row.prop(self, "hide_unused_properties")
+
+        col = layout.column(align=True)
 
         chk_missing = True
-        n = 0
         for prop in self.render_properties:
             if prop.parent_name == self.categories:
-                chk_missing = False
+                if not self.hide_unused_properties or prop.enabled:
+                    chk_missing = False
 
-                # Get right column
-                n += 1
-                if n < 20:
-                    row = col1.row(align=True)
-                else:
-                    row = col2.row(align=True)
+                    row = col.row(align=True)
+                    row.prop(prop, "enabled", text="")
+                    row.label(text=prop.name)
+                    row.prop(prop, "value_string", text="")
+                    # row.separator()
+                    # row.label(text=prop.value_type)
 
-                row.prop(prop, "enabled", text="")
-                row.label(text=prop.name)
-                row.prop(prop, "value_string", text="")
-                # row.separator()
-                # row.label(text=prop.value_type)
         if chk_missing:
             col1.label(text=f"Missing Attribute : {self.categories}")
 
@@ -247,6 +248,10 @@ class RNDRP_OT_modify_render_preset(bpy.types.Operator):
     temporary_name : bpy.props.StringProperty(
         name = "Preset Name",
         )
+    hide_unused_properties : bpy.props.BoolProperty(
+        name = "Hide Unused Properties",
+        default = True,
+        )
     preset = None
 
     @classmethod
@@ -283,7 +288,7 @@ class RNDRP_OT_modify_render_preset(bpy.types.Operator):
         # Get props from existing preset
         get_render_properties_from_preset(self.render_properties, self.preset)
 
-        return context.window_manager.invoke_props_dialog(self, width=600)
+        return context.window_manager.invoke_props_dialog(self)
 
     def draw(self, context):
         layout = self.layout
@@ -294,31 +299,23 @@ class RNDRP_OT_modify_render_preset(bpy.types.Operator):
         and self.temporary_name != self.preset.name:
             row.label(text="", icon="ERROR")
 
-        layout.prop(self, "categories", text="")
-        split = layout.split()
-        col1 = split.column(align=True)
-        col2 = split.column(align=True)
+        row = layout.row()
+        row.prop(self, "categories", text="")
+        row.prop(self, "hide_unused_properties")
+        col = layout.column(align=True)
 
         chk_missing = True
-        n = 0
         for prop in self.render_properties:
-            if prop.parent_name == self.categories\
-            or (prop.parent_name not in rp.render_properties and self.categories == "Others"):
-                chk_missing = False
+            if prop.parent_name == self.categories:
+                if not self.hide_unused_properties or prop.enabled:
+                    chk_missing = False
 
-                # Get right column
-                n += 1
-                #TODO programmatically get every 15
-                if n < 20:
-                    row = col1.row(align=True)
-                else:
-                    row = col2.row(align=True)
-
-                row.prop(prop, "enabled", text="")
-                row.label(text=prop.name)
-                row.prop(prop, "value_string", text="")
-                # row.separator()
-                # row.label(text=prop.value_type)
+                    row = col.row(align=True)
+                    row.prop(prop, "enabled", text="")
+                    row.label(text=prop.name)
+                    row.prop(prop, "value_string", text="")
+                    # row.separator()
+                    # row.label(text=prop.value_type)
         if chk_missing:
             col.label(text=f"Missing Attribute : {self.categories}")
 
