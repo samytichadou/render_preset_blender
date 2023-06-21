@@ -128,6 +128,7 @@ class RNDRP_OT_create_render_preset(bpy.types.Operator):
         reload_presets()
         # Update of props
         get_render_properties(self.render_properties)
+        #TODO correct panel size
         return context.window_manager.invoke_props_dialog(self)
 
     def draw(self, context):
@@ -139,12 +140,21 @@ class RNDRP_OT_create_render_preset(bpy.types.Operator):
             row.label(text="", icon="ERROR")
 
         layout.prop(self, "categories", text="")
-        col = layout.column(align=True)
+        split = layout.split()
+        col = split.column(align=True)
 
         chk_missing = True
+        n = 0
         for prop in self.render_properties:
             if prop.parent_name == self.categories:
                 chk_missing = False
+
+                # Get right column
+                n += 1
+                #TODO programmatically get every 15
+                if n in {20, 39}:
+                    col = split.column(align=True)
+
                 row = col.row(align=True)
                 row.prop(prop, "enabled", text="")
                 row.label(text=prop.name)
@@ -152,7 +162,7 @@ class RNDRP_OT_create_render_preset(bpy.types.Operator):
                 # row.separator()
                 # row.label(text=prop.value_type)
         if chk_missing:
-            col.label(text=f"Missing Attribute : {self.categories}")
+            col1.label(text=f"Missing Attribute : {self.categories}")
 
     def execute(self, context):
         folder = get_preset_folder()
