@@ -1,5 +1,5 @@
-#TODO Add all render... props programmatically
 #TODO Get prop name for UI
+
 '''
 Copyright (C) 2018 Samy Tichadou (tonton)
 samytichadou@gmail.com
