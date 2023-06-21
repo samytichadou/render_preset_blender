@@ -1,5 +1,3 @@
-#TODO op modification de preset
-
 '''
 Copyright (C) 2018 Samy Tichadou (tonton)
 samytichadou@gmail.com

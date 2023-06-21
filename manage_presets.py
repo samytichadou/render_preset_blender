@@ -264,7 +264,6 @@ class RNDRP_OT_modify_render_preset(bpy.types.Operator):
 
         self.temporary_name = self.preset.name
 
-        # Reload presets
         reload_presets()
 
         # Update of props
@@ -406,6 +405,8 @@ class RNDRP_OT_remove_preset(bpy.types.Operator):
         return check_active_preset()
 
     def invoke(self, context, event):
+        reload_presets()
+
         # Check if preset_name is valid
         props = context.window_manager.rndrp_properties
         try:
