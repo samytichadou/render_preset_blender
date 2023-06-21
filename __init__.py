@@ -28,7 +28,6 @@ bl_info = {
     "wiki_url": "https://github.com/samytichadou/render_preset_blender/blob/main/README.md",
     "tracker_url": "https://github.com/samytichadou/render_preset_blender/issues/new",
     "category": "Render",
-    "warning": "Alpha version, use at your own risks"
  }
 
 
