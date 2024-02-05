@@ -1,19 +1,22 @@
-import bpy
+import bpy, os
 
 from . import manage_presets as mp
+
+def format_value_type(value, type):
+    if type=="int":
+        value = int(value)
+    elif type=="bool":
+        value = True
+        if value == "False":
+            value = False
+    elif type=="float":
+        value = float(value)
+    return value
 
 def set_property_from_entry(entry):
     object = mp.get_object_from_parent_id(entry.parent_name)
 
-    value = entry.value_string
-    if entry.value_type=="int":
-        value = int(value)
-    elif entry.value_type=="bool":
-        value = True
-        if entry.value_string == "False":
-            value = False
-    elif entry.value_type=="float":
-        value = float(value)
+    value = format_value_type(entry.value_string, entry.value_type)
 
     try:
         setattr(object, entry.name, value)
@@ -23,6 +26,22 @@ def set_property_from_entry(entry):
 
     return True
 
+def set_property_from_json_entry(entry):
+    object = mp.get_object_from_parent_id(entry["parent_name"])
+    
+    value = format_value_type(entry["value_string"], entry["value_type"])
+    
+    try:
+        setattr(object, entry["name"], value)
+    except AttributeError:
+        parent = entry["parent_name"]
+        name = entry["name"]
+        print(f"Render Presets --- Unable to set {parent}.{name}")
+        return False
+
+    return True
+        
+
 def apply_render_preset(preset):
     check_missing = False
     for prop in preset.properties:
@@ -30,10 +49,21 @@ def apply_render_preset(preset):
             check_missing = True
     return not check_missing
 
+def apply_render_json(json_filepath):
+    datas = mp.read_json(json_filepath)
+    
+    check_missing = False
+    for prop in datas["properties"]:
+        if not set_property_from_json_entry(prop):
+            check_missing = True
+    return not check_missing
+        
+
 class RNDRP_OT_apply_preset(bpy.types.Operator):
     bl_idname = "rndrp.apply_preset"
     bl_label = "Apply Render Preset"
     bl_options = {"INTERNAL", "UNDO"}
+    bl_description = "Apply selected preset from interface"
 
     preset = None
 
@@ -58,11 +88,78 @@ class RNDRP_OT_apply_preset(bpy.types.Operator):
             self.report({'INFO'}, f"Preset : {self.preset.name} applied")
 
         return {'FINISHED'}
+    
+    
+class RNDRP_OT_apply_preset_name(bpy.types.Operator):
+    bl_idname = "rndrp.apply_preset_name"
+    bl_label = "Apply Render Preset Name"
+    bl_options = {"INTERNAL", "UNDO"}
+    bl_description = "Apply preset from name"
+    
+    preset_name : bpy.props.StringProperty()
+    preset = None
+
+    @classmethod
+    def poll(cls, context):
+        return True
+
+    def execute(self, context):
+        mp.reload_presets()
+        
+        # Check if preset name exists
+        if not self.preset_name:
+            self.report({'WARNING'}, "Preset name missing")
+            return {"CANCELLED"}
+
+        # Check if preset is valid
+        props = context.window_manager.rndrp_properties
+        try:
+            self.preset = props.presets[self.preset_name]
+        except KeyError:
+            self.report({'WARNING'}, "Preset not valid")
+            return {"CANCELLED"}
+
+        if not apply_render_preset(self.preset):
+            self.report({'WARNING'}, f"Preset : {self.preset.name} applied with missing properties, see console")
+        else:
+            self.report({'INFO'}, f"Preset : {self.preset.name} applied")
+
+        return {'FINISHED'}
+    
+    
+class RNDRP_OT_apply_preset_json(bpy.types.Operator):
+    bl_idname = "rndrp.apply_preset_json"
+    bl_label = "Apply Render Preset json"
+    bl_options = {"INTERNAL", "UNDO"}
+    bl_description = "Apply json preset filepath"
+
+    json_filepath : bpy.props.StringProperty()
+
+    @classmethod
+    def poll(cls, context):
+        return True
+
+    def execute(self, context):
+        # Check if preset json exists
+        if not os.path.isfile(self.json_filepath):
+            self.report({'WARNING'}, "Preset json does not exist")
+            return {"CANCELLED"}
+
+        if not apply_render_json(self.json_filepath):
+            self.report({'WARNING'}, f"Preset : {self.json_filepath} applied with missing properties, see console")
+        else:
+            self.report({'INFO'}, f"Preset : {self.json_filepath} applied")
+
+        return {'FINISHED'}
 
 
 ### REGISTER ---
 def register():
     bpy.utils.register_class(RNDRP_OT_apply_preset)
+    bpy.utils.register_class(RNDRP_OT_apply_preset_name)
+    bpy.utils.register_class(RNDRP_OT_apply_preset_json)
 
 def unregister():
     bpy.utils.unregister_class(RNDRP_OT_apply_preset)
+    bpy.utils.unregister_class(RNDRP_OT_apply_preset_name)
+    bpy.utils.unregister_class(RNDRP_OT_apply_preset_json)
