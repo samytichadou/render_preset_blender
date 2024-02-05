@@ -73,7 +73,7 @@ def get_render_properties(collection_property, disable_prop=False):
     for cat in rp.render_properties:
         parent = get_object_from_parent_id(cat)
         if parent is None:
-            print(f"Render Preset --- {cat} missing, ignored")
+            print(f"Render Preset --- {cat} missing, properties ignored")
             continue
         for name, value in parent.rna_type.properties.items():
             value = get_value_from_parent_key(cat, name)
