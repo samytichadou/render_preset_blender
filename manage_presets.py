@@ -50,7 +50,7 @@ def get_object_from_parent_id(parent_name):
         try:
             object = getattr(object, p)
         except AttributeError:
-            print(f"Render Presets --- Unable to get {parent_name}")
+            # print(f"Render Presets --- Unable to get {parent_name}")
             return None
     return object
 
@@ -63,13 +63,18 @@ def get_value_from_parent_key(parent_name, key):
 def category_items_callback(scene, context):
     items = []
     for k in rp.render_properties:
-        items.append((k, k, ""))
+        # Test if cat exists
+        if get_object_from_parent_id(k) is not None:     
+            items.append((k, k, ""))
     return items
 
 def get_render_properties(collection_property, disable_prop=False):
     collection_property.clear()
     for cat in rp.render_properties:
         parent = get_object_from_parent_id(cat)
+        if parent is None:
+            print(f"Render Preset --- {cat} missing, ignored")
+            continue
         for name, value in parent.rna_type.properties.items():
             value = get_value_from_parent_key(cat, name)
             if value is not None\
@@ -165,7 +170,7 @@ class RNDRP_OT_create_render_preset(bpy.types.Operator):
                     # row.label(text=prop.value_type)
 
         if chk_missing:
-            col1.label(text=f"Missing Attribute : {self.categories}")
+            col.label(text=f"Missing Attribute : {self.categories}")
 
     def execute(self, context):
         folder = get_preset_folder()
