@@ -6,9 +6,10 @@ def format_value_type(value, type):
     if type=="int":
         value = int(value)
     elif type=="bool":
-        value = True
-        if value == "False":
+        if value in {"False","0"}:
             value = False
+        else:
+            value = True
     elif type=="float":
         value = float(value)
     return value
