@@ -7,11 +7,21 @@ addon_name = os.path.basename(os.path.dirname(__file__))
 class RNDRP_PF_addon_prefs(bpy.types.AddonPreferences):
     bl_idname = addon_name
 
-    preferences_folder : bpy.props.StringProperty(
-        name = "BPM preferences folder",
-        default = os.path.join(os.path.join(bpy.utils.resource_path("USER"), "datafiles"), "render_presets"),
-        description = "Where BPM store global preferences",
-        subtype = "DIR_PATH",
+    folder_default = os.environ.get(
+        "RENDER_PRESETS_DEFAULT_PATH",
+        os.path.join(
+            os.path.join(
+                bpy.utils.resource_path("USER"),
+                "datafiles"
+            ), "render_presets"
+        )
+    )
+
+    preferences_folder: bpy.props.StringProperty(
+        name="BPM preferences folder",
+        default=folder_default,
+        description="Where BPM store global preferences",
+        subtype="DIR_PATH",
         )
 
     def draw(self, context):

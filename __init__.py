@@ -23,7 +23,7 @@ Created by Samy Tichadou (tonton)
 bl_info = {
     "name": "Render Preset",
     "author": "Samy Tichadou (tonton)",
-    "version": (1, 1, 4),
+    "version": (1, 1, 5),
     "blender": (3, 0, 0),
     "location": "Render Panel",
     "description": "Create Render Presets",
