@@ -40,6 +40,7 @@ render_properties_enabled = [
     "use_stamp_filename",
     "film_transparent",
     "use_freestyle",
+    "fps",
 
     # scene.render.image_settings
     "file_format",

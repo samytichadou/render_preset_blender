@@ -39,9 +39,8 @@ class RNDRP_PF_addon_prefs(bpy.types.AddonPreferences):
 
 # Get addon preferences
 def get_addon_preferences():
-    return bpy.context.preferences.addons[__package__]
-    # addon = bpy.context.preferences.addons.get(__package__)
-    # return getattr(addon, "preferences", None)
+    addon = bpy.context.preferences.addons.get(__package__)
+    return getattr(addon, "preferences", None)
 
 ### REGISTER ---
 def register():
