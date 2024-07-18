@@ -1,8 +1,6 @@
-import bpy
-from bpy.app.handlers import persistent
+import bpy, os, json
 
-import os
-import json
+from bpy.app.handlers import persistent
 
 from .addon_prefs import get_addon_preferences
 from . import render_properties as rp

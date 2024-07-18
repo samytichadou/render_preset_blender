@@ -1,3 +1,7 @@
+# This file lists render properties categories
+# and properties to avoid or enable by default
+
+
 # Categories to look for render properties
 render_properties = [
     "scene.render",

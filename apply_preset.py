@@ -2,6 +2,7 @@ import bpy, os
 
 from . import manage_presets as mp
 
+
 def format_value_type(value, type):
     if type=="int":
         value = int(value)

@@ -1,5 +1,3 @@
-#TODO Get prop name for UI
-
 '''
 Copyright (C) 2018 Samy Tichadou (tonton)
 samytichadou@gmail.com
@@ -19,20 +17,6 @@ Created by Samy Tichadou (tonton)
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
-
-bl_info = {
-    "name": "Render Preset",
-    "author": "Samy Tichadou (tonton)",
-    "version": (1, 2, 0),
-    "blender": (4, 2, 0),
-    "location": "Render Panel",
-    "description": "Create and use render presets",
-    "wiki_url": "https://github.com/samytichadou/render_preset_blender/blob/main/README.md",
-    "tracker_url": "https://github.com/samytichadou/render_preset_blender/issues/new",
-    "category": "Render",
- }
-
-
 
 
 # IMPORT

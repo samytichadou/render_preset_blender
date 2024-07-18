@@ -1,11 +1,9 @@
-import bpy
-import os
+import bpy, os
 
-addon_name = os.path.basename(os.path.dirname(__file__))
 
 # addon preferences
 class RNDRP_PF_addon_prefs(bpy.types.AddonPreferences):
-    bl_idname = addon_name
+    bl_idname = __package__
 
     preferences_folder: bpy.props.StringProperty(
         name="BPM preferences folder",
@@ -41,8 +39,9 @@ class RNDRP_PF_addon_prefs(bpy.types.AddonPreferences):
 
 # Get addon preferences
 def get_addon_preferences():
-    addon = bpy.context.preferences.addons.get(addon_name)
-    return getattr(addon, "preferences", None)
+    return bpy.context.preferences.addons[__package__]
+    # addon = bpy.context.preferences.addons.get(__package__)
+    # return getattr(addon, "preferences", None)
 
 ### REGISTER ---
 def register():
