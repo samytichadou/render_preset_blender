@@ -5,7 +5,7 @@ schema_version = "1.0.0"
 id = "render_presets"
 version = "1.2.0"
 name = "Render Presets"
-tagline = "Create render presets"
+tagline = "Create and use render presets"
 maintainer = "tonton <samytichadou@gmail.com>"
 # Supported types: "add-on", "theme"
 type = "add-on"
@@ -15,7 +15,7 @@ website = "https://github.com/samytichadou/render_preset_blender"
 
 # Optional list defined by Blender and server, see:
 # https://docs.blender.org/manual/en/dev/advanced/extensions/tags.html
-tags = ["Render"]
+tags = ["Render", "Pipeline"]
 
 blender_version_min = "4.2.0"
 # # Optional: Blender version that the extension does not support, earlier versions are supported.

@@ -26,7 +26,7 @@ bl_info = {
     "version": (1, 2, 0),
     "blender": (4, 2, 0),
     "location": "Render Panel",
-    "description": "Create Render Presets",
+    "description": "Create and use render presets",
     "wiki_url": "https://github.com/samytichadou/render_preset_blender/blob/main/README.md",
     "tracker_url": "https://github.com/samytichadou/render_preset_blender/issues/new",
     "category": "Render",
