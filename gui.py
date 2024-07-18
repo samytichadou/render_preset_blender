@@ -15,7 +15,7 @@ class RNDRP_UL_available_presets(bpy.types.UIList):
 
 # main panel
 class RNDRP_PT_render_presets(bpy.types.Panel):
-    bl_label = "Render Presets"
+    bl_label = "Render Preset"
     bl_space_type = 'PROPERTIES'
     bl_region_type = 'WINDOW'
     bl_context = "render"
