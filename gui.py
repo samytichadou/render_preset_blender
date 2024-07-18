@@ -6,7 +6,7 @@ class RNDRP_UL_available_presets(bpy.types.UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
 
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
-            layout.prop(item, "name", text="", emboss=False)
+            layout.label(text=item.name)
 
         elif self.layout_type in {'GRID'}:
             layout.alignment = 'CENTER'
@@ -46,8 +46,9 @@ class RNDRP_PT_render_presets(bpy.types.Panel):
         col.operator("rndrp.create_preset", icon='ADD', text="")
         col.operator("rndrp.remove_preset", icon='REMOVE', text="")
         col.separator()
-        col.operator("rndrp.apply_preset", icon="CHECKMARK", text="")
         col.operator("rndrp.modify_preset", icon="GREASEPENCIL", text="")
+        col.separator()
+        col.operator("rndrp.apply_preset", icon="CHECKMARK", text="")
 
 
 ### REGISTER ---
