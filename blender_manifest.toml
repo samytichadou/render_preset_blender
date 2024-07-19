@@ -3,7 +3,7 @@ schema_version = "1.0.0"
 # Example of manifest file for a Blender extension
 # Change the values according to your extension
 id = "render_preset"
-version = "1.2.0"
+version = "1.2.1"
 name = "Render Preset"
 tagline = "Create and use render presets"
 maintainer = "tonton <samytichadou@gmail.com>"
@@ -58,7 +58,8 @@ license = [
 # # Keep this a single short sentence without a period (.) at the end.
 # # For longer explanations use the documentation or detail page.
 #
-# [permissions]
+[permissions]
+files = "Reading and writing data files"
 # network = "Need to sync motion-capture data to server"
 # files = "Import/export FBX from/to disk"
 # clipboard = "Copy and paste bone transforms"

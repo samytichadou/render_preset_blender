@@ -21,8 +21,12 @@ class RNDRP_PF_addon_prefs(bpy.types.AddonPreferences):
     def draw(self, context):
         layout = self.layout
 
+        # donate
+        op=layout.operator("wm.url_open", text="Donate", icon="FUND")
+        op.url="https://ko-fi.com/tonton_blender"
+
         layout.prop(self, "preferences_folder", text = "Preference Folder")
-        
+
         box = layout.box()
         col = box.column(align=True)
         col.label(text="Infos", icon="INFO")
@@ -36,6 +40,7 @@ class RNDRP_PF_addon_prefs(bpy.types.AddonPreferences):
         subcol = subbox.column(align=True)
         subcol.label(text="With preset json filepath :")
         subcol.label(text='bpy.ops.rndrp.apply_preset_json(json_filepath="preset_filepath")')
+
 
 # Get addon preferences
 def get_addon_preferences():
