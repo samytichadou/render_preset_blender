@@ -1,5 +1,3 @@
-# render_preset_blender
-
 ![Logo](https://raw.githubusercontent.com/samytichadou/render_preset_blender/blender_4_2_x_extension/resources/render_preset_logo.png "Render Preset logo")
 
 Create extensive Render Presets in a specific folder (can be on a shared drive) and apply them on the fly.
