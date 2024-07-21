@@ -18,7 +18,15 @@ def format_value_type(value, type):
 def set_property_from_entry(entry):
     object = mp.get_object_from_parent_id(entry.parent_name)
 
-    value = format_value_type(entry.value_string, entry.value_type)
+    value = None
+    if entry.value_type == "str":
+        value = entry.value_string
+    elif entry.value_type == "int":
+        value = entry.value_integer
+    elif entry.value_type == "float":
+        value = entry.value_float
+    elif entry.value_type == "bool":
+        value = entry.value_boolean
 
     try:
         setattr(object, entry.name, value)

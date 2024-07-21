@@ -62,12 +62,13 @@ render_properties_enabled = [
     "samples",
 
     # scene.eevee
-    "aa_render_samples",
+    "taa_render_samples"
     "use_taa_reprojection",
     "use_gtao",
     "sss_samples",
     "use_overscan",
     "overscan_size",
+    "use_raytracing",
 
     # scene.view_settings
     "view_transform",

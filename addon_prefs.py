@@ -22,8 +22,8 @@ class RNDRP_PF_addon_prefs(bpy.types.AddonPreferences):
         layout = self.layout
 
         # donate
-        op=layout.operator("wm.url_open", text="Donate", icon="FUND")
-        op.url="https://ko-fi.com/tonton_blender"
+        # op=layout.operator("wm.url_open", text="Donate", icon="FUND")
+        # op.url="https://ko-fi.com/tonton_blender"
 
         layout.prop(self, "preferences_folder", text = "Preference Folder")
 
