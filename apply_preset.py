@@ -3,20 +3,7 @@ import bpy, os
 from . import manage_presets as mp
 
 
-def format_value_type(value, type):
-    if type=="int":
-        value = int(value)
-    elif type=="bool":
-        if value in {"False","0"}:
-            value = False
-        else:
-            value = True
-    elif type=="float":
-        value = float(value)
-    return value
-
-def set_property_from_entry(entry):
-    object = mp.get_object_from_parent_id(entry.parent_name)
+def format_value_type(entry):
 
     value = None
     if entry.value_type == "str":
@@ -28,10 +15,17 @@ def set_property_from_entry(entry):
     elif entry.value_type == "bool":
         value = entry.value_boolean
 
+    return value
+
+def set_property_from_entry(entry):
+    object = mp.get_object_from_parent_id(entry.parent_name)
+
+    value = format_value_type(entry)
+
     try:
-        setattr(object, entry.name, value)
+        setattr(object, entry.identifier, value)
     except AttributeError:
-        print(f"Render Presets --- Unable to set {entry.parent_name}.{entry.name}")
+        print(f"Render Presets --- Unable to set {entry.parent_name}.{entry.identifier}")
         return False
 
     return True
@@ -39,14 +33,14 @@ def set_property_from_entry(entry):
 def set_property_from_json_entry(entry):
     object = mp.get_object_from_parent_id(entry["parent_name"])
     
-    value = format_value_type(entry["value_string"], entry["value_type"])
+    value = format_value_type(entry)
     
     try:
-        setattr(object, entry["name"], value)
+        setattr(object, entry["identifier"], value)
     except AttributeError:
         parent = entry["parent_name"]
-        name = entry["name"]
-        print(f"Render Presets --- Unable to set {parent}.{name}")
+        identifier = entry["identifier"]
+        print(f"Render Presets --- Unable to set {parent}.{identifier}")
         return False
 
     return True

@@ -33,6 +33,8 @@ class RNDRP_PR_render_properties(bpy.types.PropertyGroup):
     """A bpy.types.PropertyGroup descendant for bpy.props.CollectionProperty"""
     enabled : bpy.props.BoolProperty()
 
+    identifier : bpy.props.StringProperty()
+
     value_string : bpy.props.StringProperty()
     value_boolean : bpy.props.BoolProperty()
     value_integer : bpy.props.IntProperty()
@@ -85,13 +87,14 @@ def get_render_properties(collection_property, disable_prop=False):
         if parent is None:
             print(f"Render Preset --- {cat} missing, properties ignored")
             continue
-        for name, value in parent.rna_type.properties.items():
-            value = get_value_from_parent_key(cat, name)
+        for identifier, prop in parent.rna_type.properties.items():
+            value = get_value_from_parent_key(cat, identifier)
             if value is not None\
-            and name not in rp.render_properties_avoided\
+            and identifier not in rp.render_properties_avoided\
             and type(value).__name__ in {"int","str","float","bool"}:
                 new = collection_property.add()
-                new.name = name
+                new.identifier = identifier
+                new.name = prop.name
                 new.parent_name = cat
                 new.value_type = type(value).__name__
                 if type(value) is str:
@@ -103,7 +106,7 @@ def get_render_properties(collection_property, disable_prop=False):
                 elif type(value) is bool:
                     new.value_boolean = value
 
-                if not disable_prop and name in rp.render_properties_enabled:
+                if not disable_prop and identifier in rp.render_properties_enabled:
                     new.enabled = True
 
 def get_dataset_from_collection(name, collection_property):
@@ -114,6 +117,7 @@ def get_dataset_from_collection(name, collection_property):
         if entry.enabled:
             propdatas = {}
             propdatas["name"] = entry.name
+            propdatas["identifier"] = entry.identifier
 
             propdatas["value_string"] = entry.value_string
             propdatas["value_integer"] = entry.value_integer
@@ -244,6 +248,7 @@ def get_render_properties_from_preset(collection, preset):
         except KeyError:
             new_prop = collection.add()
             new_prop.name = prop.name
+            new_prop.identifier = prop.identifier
             new_prop.parent_name = prop.parent_name
             new_prop.value_type = prop.value_type
 
@@ -427,6 +432,7 @@ def load_preset_datas(dataset):
     for prop in dataset["properties"]:
         newprop = new.properties.add()
         newprop.name = prop["name"]
+        newprop.identifier = prop["identifier"]
 
         newprop.value_string = prop["value_string"]
         newprop.value_integer = prop["value_integer"]

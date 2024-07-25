@@ -62,7 +62,7 @@ render_properties_enabled = [
     "samples",
 
     # scene.eevee
-    "taa_render_samples"
+    "taa_render_samples",
     "use_taa_reprojection",
     "use_gtao",
     "sss_samples",
