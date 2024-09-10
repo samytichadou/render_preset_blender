@@ -5,6 +5,13 @@ from bpy.app.handlers import persistent
 from .addon_prefs import get_addon_preferences
 from . import render_properties as rp
 
+# TODO Get and use enumproperty instead of raw string
+# def enum_entries(data_name, data_prop_name):
+#     try:
+#         setattr(data_name, data_prop_name, None)
+#     except Exception as e:
+#         return str(e).split("'")[1::2]
+
 
 def read_json(filepath):
     with open(filepath, "r") as read_file:
@@ -21,13 +28,50 @@ def get_preset_folder():
         os.makedirs(folder)
     return folder
 
+def get_enum_values(object, identifier):
+    prop = object.bl_rna.properties[identifier]
+
+    values = []
+    try:
+        for e in prop.enum_items:
+            values.append(e.identifier)
+    except AttributeError:
+        pass
+
+    return values
+
+
+def enum_callback(self, context):
+    items = []
+
+    object = get_object_from_parent_id(self.parent_name)
+
+    for e in get_enum_values(object, self.identifier):
+        items.append((e, e, ""))
+
+    return items
 
 class RNDRP_PR_render_properties(bpy.types.PropertyGroup):
     """A bpy.types.PropertyGroup descendant for bpy.props.CollectionProperty"""
     enabled : bpy.props.BoolProperty()
+
+    identifier : bpy.props.StringProperty()
+
     value_string : bpy.props.StringProperty()
+    value_boolean : bpy.props.BoolProperty()
+    value_integer : bpy.props.IntProperty()
+    value_float : bpy.props.FloatProperty()
+
+    value_min : bpy.props.FloatProperty()
+    value_max : bpy.props.FloatProperty()
+
     value_type : bpy.props.StringProperty()
     parent_name : bpy.props.StringProperty()
+
+    enum : bpy.props.BoolProperty()
+    enum_values : bpy.props.EnumProperty(
+        items = enum_callback,
+        )
 
 class RNDRP_PR_preset_collection(bpy.types.PropertyGroup):
     properties : bpy.props.CollectionProperty(
@@ -48,7 +92,7 @@ def get_object_from_parent_id(parent_name):
         try:
             object = getattr(object, p)
         except AttributeError:
-            # print(f"Render Presets --- Unable to get {parent_name}")
+            # print(f"Render Preset --- Unable to get {parent_name}")
             return None
     return object
 
@@ -58,11 +102,11 @@ def get_value_from_parent_key(parent_name, key):
         return None
     return getattr(object, key)
 
-def category_items_callback(scene, context):
+def category_items_callback(self, context):
     items = []
     for k in rp.render_properties:
         # Test if cat exists
-        if get_object_from_parent_id(k) is not None:     
+        if get_object_from_parent_id(k) is not None:
             items.append((k, k, ""))
     return items
 
@@ -73,18 +117,35 @@ def get_render_properties(collection_property, disable_prop=False):
         if parent is None:
             print(f"Render Preset --- {cat} missing, properties ignored")
             continue
-        for name, value in parent.rna_type.properties.items():
-            value = get_value_from_parent_key(cat, name)
+        for identifier, prop in parent.rna_type.properties.items():
+            value = get_value_from_parent_key(cat, identifier)
             if value is not None\
-            and name not in rp.render_properties_avoided\
+            and identifier not in rp.render_properties_avoided\
             and type(value).__name__ in {"int","str","float","bool"}:
                 new = collection_property.add()
-                new.name = name
+                new.identifier = identifier
+                new.name = prop.name
                 new.parent_name = cat
-                new.value_string = str(value)
                 new.value_type = type(value).__name__
 
-                if not disable_prop and name in rp.render_properties_enabled:
+                #TODO finish enum prop logic
+                if get_enum_values(parent, identifier):
+                    new.enum = True
+
+                if type(value) is str:
+                    new.value_string = value
+                elif type(value) is int:
+                    new.value_integer = value
+                    new.value_min = prop.hard_min
+                    new.value_max = prop.hard_max
+                elif type(value) is float:
+                    new.value_float = value
+                    new.value_min = prop.hard_min
+                    new.value_max = prop.hard_max
+                elif type(value) is bool:
+                    new.value_boolean = value
+
+                if not disable_prop and identifier in rp.render_properties_enabled:
                     new.enabled = True
 
 def get_dataset_from_collection(name, collection_property):
@@ -95,7 +156,16 @@ def get_dataset_from_collection(name, collection_property):
         if entry.enabled:
             propdatas = {}
             propdatas["name"] = entry.name
+            propdatas["identifier"] = entry.identifier
+
             propdatas["value_string"] = entry.value_string
+            propdatas["value_integer"] = entry.value_integer
+            propdatas["value_float"] = entry.value_float
+            propdatas["value_boolean"] = entry.value_boolean
+
+            propdatas["value_min"] = entry.value_min
+            propdatas["value_max"] = entry.value_max
+
             propdatas["value_type"] = entry.value_type
             propdatas["parent_name"] = entry.parent_name
             dataset["properties"].append(propdatas)
@@ -122,9 +192,8 @@ class RNDRP_OT_create_render_preset(bpy.types.Operator):
         name = "Preset Name",
         default = "New Preset",
         )
-    hide_unused_properties : bpy.props.BoolProperty(
-        name = "Hide Unused Properties",
-        default = True,
+    show_all_properties : bpy.props.BoolProperty(
+        name = "Show All Properties",
         )
 
     @classmethod
@@ -148,22 +217,41 @@ class RNDRP_OT_create_render_preset(bpy.types.Operator):
         if check_preset_name_exists(self.preset_name):
             row.label(text="", icon="ERROR")
 
+        layout.separator()
+
         row = layout.row()
         row.prop(self, "categories", text="")
-        row.prop(self, "hide_unused_properties")
+        row.prop(self, "show_all_properties")
+
+        layout.separator()
 
         col = layout.column(align=True)
+
+        row = col.row()
+        row.label(text="Save Property")
+        sub = row.row()
+        sub.alignment="RIGHT"
+        sub.label(text="Property Value")
+
+        col.separator()
 
         chk_missing = True
         for prop in self.render_properties:
             if prop.parent_name == self.categories:
-                if not self.hide_unused_properties or prop.enabled:
+                if self.show_all_properties or prop.enabled:
                     chk_missing = False
 
                     row = col.row(align=True)
                     row.prop(prop, "enabled", text="")
                     row.label(text=prop.name)
-                    row.prop(prop, "value_string", text="")
+                    if prop.value_type == "str":
+                        row.prop(prop, "value_string", text="")
+                    elif prop.value_type == "int":
+                        row.prop(prop, "value_integer", text="")
+                    elif prop.value_type == "float":
+                        row.prop(prop, "value_float", text="")
+                    elif prop.value_type == "bool":
+                        row.prop(prop, "value_boolean", text="")
                     # row.separator()
                     # row.label(text=prop.value_type)
 
@@ -203,18 +291,27 @@ class RNDRP_OT_create_render_preset(bpy.types.Operator):
 
 def get_render_properties_from_preset(collection, preset):
     for prop in preset.properties:
+
+        new_prop = None
         try:
             # If prop already exists
             new_prop = collection[prop.name]
-            new_prop.value_string = prop.value_string
-            new_prop.enabled = True
         except KeyError:
             new_prop = collection.add()
             new_prop.name = prop.name
+            new_prop.identifier = prop.identifier
             new_prop.parent_name = prop.parent_name
-            new_prop.value_string = prop.value_string
             new_prop.value_type = prop.value_type
-            new_prop.enabled = True
+
+        new_prop.value_string = prop.value_string
+        new_prop.value_integer = prop.value_integer
+        new_prop.value_float = prop.value_float
+        new_prop.value_boolean = prop.value_boolean
+
+        new_prop.value_min = prop.value_min
+        new_prop.value_max = prop.value_max
+
+        new_prop.enabled = True
 
 def modify_category_items_callback(scene, context):
     cat = []
@@ -251,9 +348,9 @@ class RNDRP_OT_modify_render_preset(bpy.types.Operator):
     temporary_name : bpy.props.StringProperty(
         name = "Preset Name",
         )
-    hide_unused_properties : bpy.props.BoolProperty(
-        name = "Hide Unused Properties",
-        default = True,
+    show_all_properties : bpy.props.BoolProperty(
+        name = "Show All Properies",
+        # default = True,
         )
     preset = None
 
@@ -304,21 +401,30 @@ class RNDRP_OT_modify_render_preset(bpy.types.Operator):
 
         row = layout.row()
         row.prop(self, "categories", text="")
-        row.prop(self, "hide_unused_properties")
+        row.prop(self, "show_all_properties")
+
+        layout.separator()
+
         col = layout.column(align=True)
 
         chk_missing = True
         for prop in self.render_properties:
             if prop.parent_name == self.categories:
-                if not self.hide_unused_properties or prop.enabled:
+                if self.show_all_properties or prop.enabled:
                     chk_missing = False
 
                     row = col.row(align=True)
                     row.prop(prop, "enabled", text="")
                     row.label(text=prop.name)
-                    row.prop(prop, "value_string", text="")
-                    # row.separator()
-                    # row.label(text=prop.value_type)
+                    if prop.value_type == "str":
+                        row.prop(prop, "value_string", text="")
+                    elif prop.value_type == "int":
+                        row.prop(prop, "value_integer", text="")
+                    elif prop.value_type == "float":
+                        row.prop(prop, "value_float", text="")
+                    elif prop.value_type == "bool":
+                        row.prop(prop, "value_boolean", text="")
+
         if chk_missing:
             col.label(text=f"Missing Attribute : {self.categories}")
 
@@ -381,7 +487,16 @@ def load_preset_datas(dataset):
     for prop in dataset["properties"]:
         newprop = new.properties.add()
         newprop.name = prop["name"]
+        newprop.identifier = prop["identifier"]
+
         newprop.value_string = prop["value_string"]
+        newprop.value_integer = prop["value_integer"]
+        newprop.value_float = prop["value_float"]
+        newprop.value_boolean= prop["value_boolean"]
+
+        newprop.value_min = prop["value_min"]
+        newprop.value_max = prop["value_max"]
+
         newprop.value_type = prop["value_type"]
         newprop.parent_name = prop["parent_name"]
 
