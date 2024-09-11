@@ -5,14 +5,9 @@ from bpy.app.handlers import persistent
 from .addon_prefs import get_addon_preferences
 from . import render_properties as rp
 
-# TODO Search field for properties
-# TODO manual categories ?
-# TODO All categories option
-# TODO dynamically add property categories
-# TODO Prevent name dupes
 # TODO Better popup ui panels
-# TODO Common class for modify/create operators
 # TODO Warn user if preset name already exists
+# TODO Use min max
 
 def read_json(filepath):
     with open(filepath, "r") as read_file:
@@ -222,6 +217,35 @@ def check_preset_name_exists(name):
     except KeyError:
         return False
     
+def get_unique_preset_name(name):
+    
+    if check_preset_name_exists(name):
+        
+        cnt = 0
+        
+        while True:
+            
+            if cnt < 1000:
+                preset_name = f"{name}_{str(cnt).zfill(3)}"
+            else:
+                preset_name = f"{name}_{str(cnt)}"
+                
+            if not check_preset_name_exists(preset_name):
+                name = preset_name
+                break
+            
+            cnt += 1
+            
+    return name
+
+def remove_number_ending(name):
+
+    if name[-3:].isdigit()\
+    and name[-4:][:1] == "_":
+        name = name[:-4]
+
+    return name
+    
 def draw_property(prop, container):
     row = container.row(align=True)
     row.prop(prop, "enabled", text=prop.name)
@@ -247,18 +271,22 @@ class RNDRP_OT_preset_management(bpy.types.Operator):
         )
     categories : bpy.props.EnumProperty(
         name = "Categories",
+        description = "Categories to get properties from",
         items = category_items_callback,
         )
     preset_name : bpy.props.StringProperty(
         name = "Preset Name",
         default = "New Preset",
+        # options = {"SKIP_SAVE"},
         )
     show_all_properties : bpy.props.BoolProperty(
         name = "Show Unsaved Properties",
+        description = "Show unsaved properties to enable them for this preset",
         )
     search_property : bpy.props.StringProperty(
         name = "Search",
         options = {"TEXTEDIT_UPDATE"},
+        description = "Search property in all categories",
         )
     
     def draw(self, context):
@@ -334,6 +362,12 @@ class RNDRP_OT_create_render_preset(RNDRP_OT_preset_management):
 
         # Update of props
         get_render_properties(self.render_properties)
+        
+        # Remove "_xxx" ending
+        self.preset_name = remove_number_ending(self.preset_name)
+        # Get unique name
+        unique_name = get_unique_preset_name(self.preset_name)
+        self.preset_name = unique_name
 
         return context.window_manager.invoke_props_dialog(self)#, width=400)
 
