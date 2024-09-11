@@ -6,7 +6,7 @@ from . import manage_presets as mp
 def format_value_type(entry):
 
     value = None
-    if entry.value_type == "str":
+    if entry.value_type in ["str", "enum"]:
         value = entry.value_string
     elif entry.value_type == "int":
         value = entry.value_integer
