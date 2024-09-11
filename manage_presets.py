@@ -6,7 +6,6 @@ from .addon_prefs import get_addon_preferences
 from . import render_properties as rp
 
 # TODO Better popup ui panels
-# TODO Warn user if preset name already exists
 # TODO Use min max
 
 def read_json(filepath):
@@ -25,7 +24,7 @@ def get_preset_folder():
     return folder
 
 def get_enum_values(object, identifier):
-    # Correct way
+    # Correct way, errors with some weird blender properties (render engine...)
     
     # values = []
     # prop = object.bl_rna.properties[identifier]
@@ -277,7 +276,7 @@ class RNDRP_OT_preset_management(bpy.types.Operator):
     preset_name : bpy.props.StringProperty(
         name = "Preset Name",
         default = "New Preset",
-        # options = {"SKIP_SAVE"},
+        options = {"TEXTEDIT_UPDATE"},
         )
     show_all_properties : bpy.props.BoolProperty(
         name = "Show Unsaved Properties",
@@ -289,18 +288,30 @@ class RNDRP_OT_preset_management(bpy.types.Operator):
         description = "Search property in all categories",
         )
     
+    modify = False
+    
     def draw(self, context):
         layout = self.layout
 
         row = layout.row()
         row.prop(self, "preset_name", text="Name")
         
-        # if check_preset_name_exists(self.preset_name):
-        #     row.label(text="", icon="ERROR")
+        # Warning if name already exists/invalid name
+        if (
+            check_preset_name_exists(self.preset_name) and (
+                not self.modify
+                or self.preset_name != self.preset.name
+            )
+            or not self.preset_name
+        ):
+            row.label(text="", icon="ERROR")
+        else:
+            row.label(text="", icon="CHECKMARK")
+
 
         box = layout.box()
         col = box.column()
-        col.label(text="Filters")
+        col.label(text="Property Filters")
         subcol = col.column()
         subcol .enabled = not self.search_property
         subcol .prop(self, "show_all_properties")
@@ -384,6 +395,11 @@ class RNDRP_OT_create_render_preset(RNDRP_OT_preset_management):
         # Check if preset already exists
         if os.path.isfile(filepath):
             self.report({'WARNING'}, f"{self.preset_name} already exists, choose a different name")
+            return {"CANCELLED"}
+        
+        # Check for invalid preset name
+        if not self.preset_name:
+            self.report({'WARNING'}, f"Invalid preset name, choose a different name")
             return {"CANCELLED"}
 
         dataset = get_dataset_from_collection(
@@ -475,6 +491,10 @@ class RNDRP_OT_modify_render_preset(RNDRP_OT_preset_management):
         return check_active_preset()
 
     def invoke(self, context, event):
+        
+        # Inform UI this is modify operator
+        self.modify = True
+        
         # Check for valid folder
         folder = get_preset_folder()
         if not os.path.isdir(folder):
@@ -513,6 +533,11 @@ class RNDRP_OT_modify_render_preset(RNDRP_OT_preset_management):
         and self.preset_name != self.preset.name:
             self.report({'WARNING'}, f"{self.preset_name} already exists, choose a different name")
             return {'CANCELLED'}
+        
+        # Check for invalid preset name
+        if not self.preset_name:
+            self.report({'WARNING'}, f"Invalid preset name, choose a different name")
+            return {"CANCELLED"}
 
         folder = get_preset_folder()
 
