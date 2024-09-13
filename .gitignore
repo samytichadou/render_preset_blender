@@ -163,4 +163,9 @@ cython_debug/
 # FreeFileSync
 *.ffs_db
 
-.releases/
+# Releases
+releases/
+*.zip
+
+# Kate build
+*.build
