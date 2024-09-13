@@ -164,6 +164,7 @@ cython_debug/
 *.ffs_db
 
 # Releases
+.releases/
 releases/
 *.zip
 
