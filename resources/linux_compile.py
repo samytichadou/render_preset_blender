@@ -16,6 +16,7 @@ deploy_path = "/home/tonton/.config/blender/4.2/extensions/user_default/"
 import os, zipfile, shutil, sys
 
 ### CHECK BEHAVIOR (deploy/release)
+
 # Missing argument
 if len(sys.argv) == 1 :
     print("Missing argument")
@@ -64,10 +65,11 @@ if "r" in behavior:
     print(f"Version : {version}")
 
 ### CREATE RELEASE/DEPLOY
-release_path = os.path.join(os.path.join(rootpath, "releases"), f"{addon_id}_{version}.zip")
 
-# Remove file if existing
 if "r" in behavior:
+    release_path = os.path.join(os.path.join(rootpath, "releases"), f"{addon_id}_{version}.zip")
+    
+    # Remove file if existing
     if os.path.isfile(release_path):
         if not dry: 
             os.remove(release_path)
