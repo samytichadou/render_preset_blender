@@ -6,6 +6,7 @@
 render_properties = [
     "scene.render",
     "scene.render.image_settings",
+    "scene.render.ffmpeg",
     "scene.cycles",
     "scene.eevee",
     "scene.view_settings",
@@ -48,6 +49,11 @@ render_properties_enabled = [
     "compression",
     "color_depth",
     "quality",
+    
+    # scene.render.ffmpeg
+    "format",
+    "codec",
+    "audio_codec",
 
     # scene.cycles
     "device",
