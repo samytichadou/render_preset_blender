@@ -1,4 +1,4 @@
-addon_name = "render_preset"
+addon_id = "render_preset"
 dirs_exclude = [
     ".git",
     ".github",
@@ -11,7 +11,7 @@ file_pattern_exclude = [
     ".ffs_db",
     ".build",
 ]
-deploy_path = "/home/tonton/.config/blender/4.2/extensions/user_default/render_preset/"
+deploy_path = "/home/tonton/.config/blender/4.2/extensions/user_default/"
 
 import os, zipfile, shutil, sys
 
@@ -64,7 +64,7 @@ if "r" in behavior:
     print(f"Version : {version}")
 
 ### CREATE RELEASE/DEPLOY
-release_path = os.path.join(os.path.join(rootpath, "releases"), f"{addon_name}_{version}.zip")
+release_path = os.path.join(os.path.join(rootpath, "releases"), f"{addon_id}_{version}.zip")
 
 # Remove file if existing
 if "r" in behavior:
@@ -109,7 +109,7 @@ for filepath in file_list:
     if "d" in behavior and not dry:
         shutil.copy(
             filepath,
-            deploy_path,
+            os.path.join(deploy_path, addon_id),
         )
 
 # Recap
