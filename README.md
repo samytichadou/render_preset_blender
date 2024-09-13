@@ -9,7 +9,7 @@ This addon also supports applying render preset through python (background scrip
 
 ![Image](https://raw.githubusercontent.com/samytichadou/render_preset_blender/blender_4_2_x_extension/resources/render_preset_image_bg.jpg "Render Preset Image")
 
-https://github.com/samytichadou/render_preset_blender/blob/blender_4_2_x_extension/resources/edit_render_preset.mp4
+![Video](https://github.com/samytichadou/render_preset_blender/raw/blender_4_2_x_extension/resources/edit_render_preset.mp4)
 
 The addon in action  
 
