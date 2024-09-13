@@ -35,6 +35,16 @@ else:
     print("Invalid argument")
     exit()
 
+# Dry run
+dry = False
+if len(sys.argv) > 2 :
+    if sys.argv[2].lower() == "-dry":
+        dry = True
+        print("Dry run : described operations will not happen")
+    else:
+        print("Invalid argument")
+        exit()
+
 ### GET ADDON ROOTPATH
 rootpath = os.path.dirname(
     os.path.dirname(
@@ -44,21 +54,24 @@ rootpath = os.path.dirname(
 print(f"Rootpath : {rootpath}")
 
 ### GET VERSION
-manifest_file = os.path.join(rootpath, "blender_manifest.toml")
-with open(manifest_file) as file:
-    for line in file:
-        if line.startswith("version = "):
-            version = line.split('"')[1]
-            version = version.replace(".", "_")
-print(f"Version : {version}")
+if "r" in behavior:
+    manifest_file = os.path.join(rootpath, "blender_manifest.toml")
+    with open(manifest_file) as file:
+        for line in file:
+            if line.startswith("version = "):
+                version = line.split('"')[1]
+                version = version.replace(".", "_")
+    print(f"Version : {version}")
 
 ### CREATE RELEASE/DEPLOY
 release_path = os.path.join(os.path.join(rootpath, "releases"), f"{addon_name}_{version}.zip")
 
 # Remove file if existing
-if os.path.isfile(release_path):
-    os.remove(release_path)
-    print(f"Removed file : {release_path}")
+if "r" in behavior:
+    if os.path.isfile(release_path):
+        if not dry: 
+            os.remove(release_path)
+        print(f"Removed file : {release_path}")
 
 # Get file list
 file_list = []
@@ -80,20 +93,20 @@ print("Files to treat :")
 print(file_list)
 
 # Create archive and deploy
-if "r" in behavior:
+if "r" in behavior and not dry:
     zipf = zipfile.ZipFile(release_path, "w")
 
 for filepath in file_list:
 
     # Write to zip
-    if "r" in behavior:
+    if "r" in behavior and not dry:
         zipf.write(
             filepath,
             os.path.basename(filepath), # Remove dir structure in zip
             )
 
     # Deploy
-    if "d" in behavior:
+    if "d" in behavior and not dry:
         shutil.copy(
             filepath,
             deploy_path,
@@ -102,7 +115,8 @@ for filepath in file_list:
 # Recap
 print()
 if "r" in behavior:
-    zipf.close()
+    if not dry:
+        zipf.close()
     print(f"Release created : {release_path}")
 
 if "d" in behavior:
