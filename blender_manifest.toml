@@ -1,0 +1,30 @@
+schema_version = "1.0.0"
+
+id = "render_preset"
+version = "1.3.1"
+name = "Render Preset"
+tagline = "Create and use render presets"
+maintainer = "tonton <samytichadou@gmail.com>"
+# Supported types: "add-on", "theme"
+type = "add-on"
+
+# Optional link to documentation, support, source files, etc
+website = "https://github.com/samytichadou/render_preset_blender"
+
+# Optional list defined by Blender and server, see:
+# https://docs.blender.org/manual/en/dev/advanced/extensions/tags.html
+tags = ["Render", "Pipeline"]
+
+blender_version_min = "4.2.0"
+
+# License conforming to https://spdx.org/licenses/ (use "SPDX: prefix)
+# https://docs.blender.org/manual/en/dev/advanced/extensions/licenses.html
+license = [
+  "SPDX:GPL-3.0-or-later",
+]
+
+[permissions]
+files = "Reading and writing json preset files in a user-defined location"
+# network = "Need to sync motion-capture data to server"
+# files = "Import/export FBX from/to disk"
+# clipboard = "Copy and paste bone transforms"
