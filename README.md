@@ -1,4 +1,6 @@
-![Logo](https://raw.githubusercontent.com/samytichadou/render_preset_blender/main/resources/graphics/render_preset_logo.png "Render Preset logo")
+![Logo](https://raw.githubusercontent.com/samytichadou/render_preset_blender/main/resources/graphics/render_preset_logo.png "Render Preset logo")  
+
+**This addon is available from the [Blender Extension Platform](https://extensions.blender.org/add-ons/render-preset/) and directly inside Blender (from the *Preferences*, *Get Extensions* category)**  
 
 Create extensive Render Presets in a specific folder (can be on a shared drive) and apply them on the fly.
 
