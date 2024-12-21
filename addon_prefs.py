@@ -7,13 +7,7 @@ class RNDRP_PF_addon_prefs(bpy.types.AddonPreferences):
 
     preferences_folder: bpy.props.StringProperty(
         name="BPM preferences folder",
-        default=os.path.join(
-            os.path.join(
-                bpy.utils.resource_path("USER"),
-                "datafiles"
-            ),
-            "render_presets"
-        ),
+        default = bpy.utils.extension_path_user(str(__package__)),
         description="Where BPM store global preferences",
         subtype="DIR_PATH",
     )
