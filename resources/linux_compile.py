@@ -1,3 +1,15 @@
+### COMPILE SCRIPT ###
+    # Zip relevant files or deploy them into specified path
+
+    # Arguments :
+        # - r : Create release zip file
+        # - r : Deploy files in specified path
+        # - rd/dr : Create zip and deploy files
+
+        # - dry : (in second position) Dry run
+
+###
+
 addon_id = "render_preset"
 dirs_exclude = [
     ".git",
@@ -68,7 +80,7 @@ if "r" in behavior:
 
 if "r" in behavior:
     release_path = os.path.join(os.path.join(rootpath, "releases"), f"{addon_id}_{version}.zip")
-    
+
     # Remove file if existing
     if os.path.isfile(release_path):
         if not dry: 
@@ -94,7 +106,7 @@ for dirname, subdirs, files in os.walk(rootpath):
 print("Files to treat :")
 print(file_list)
 
-# Create archive and deploy
+# Create archive
 if "r" in behavior and not dry:
     zipf = zipfile.ZipFile(release_path, "w")
 
