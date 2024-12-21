@@ -1,7 +1,12 @@
+# This file lists render properties categories
+# and properties to avoid or enable by default
+
+
 # Categories to look for render properties
 render_properties = [
     "scene.render",
     "scene.render.image_settings",
+    "scene.render.ffmpeg",
     "scene.cycles",
     "scene.eevee",
     "scene.view_settings",
@@ -36,6 +41,7 @@ render_properties_enabled = [
     "use_stamp_filename",
     "film_transparent",
     "use_freestyle",
+    "fps",
 
     # scene.render.image_settings
     "file_format",
@@ -43,6 +49,11 @@ render_properties_enabled = [
     "compression",
     "color_depth",
     "quality",
+    
+    # scene.render.ffmpeg
+    "format",
+    "codec",
+    "audio_codec",
 
     # scene.cycles
     "device",
@@ -57,12 +68,13 @@ render_properties_enabled = [
     "samples",
 
     # scene.eevee
-    "aa_render_samples",
+    "taa_render_samples",
     "use_taa_reprojection",
     "use_gtao",
     "sss_samples",
     "use_overscan",
     "overscan_size",
+    "use_raytracing",
 
     # scene.view_settings
     "view_transform",
