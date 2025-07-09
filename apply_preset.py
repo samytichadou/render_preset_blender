@@ -4,7 +4,6 @@ from . import manage_presets as mp
 
 
 def format_value_type(entry):
-
     value = None
     if entry.value_type in ["str", "enum"]:
         value = entry.value_string
@@ -14,6 +13,19 @@ def format_value_type(entry):
         value = entry.value_float
     elif entry.value_type == "bool":
         value = entry.value_boolean
+
+    return value
+
+def format_value_type_dict(dictionnary):
+    value = None
+    if dictionnary["value_type"] in ["str", "enum"]:
+        value = dictionnary["value_string"]
+    elif dictionnary["value_type"] == "int":
+        value = dictionnary["value_integer"]
+    elif dictionnary["value_type"] == "float":
+        value = dictionnary["value_float"]
+    elif dictionnary["value_type"] == "bool":
+        value = dictionnary["value_boolean"]
 
     return value
 
@@ -33,7 +45,10 @@ def set_property_from_entry(entry):
 def set_property_from_json_entry(entry):
     object = mp.get_object_from_parent_id(entry["parent_name"])
     
-    value = format_value_type(entry)
+    value = format_value_type_dict(entry)
+
+    print()
+    print(value)
     
     try:
         setattr(object, entry["identifier"], value)
