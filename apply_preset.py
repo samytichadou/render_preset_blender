@@ -47,9 +47,6 @@ def set_property_from_json_entry(entry):
     
     value = format_value_type_dict(entry)
 
-    print()
-    print(value)
-    
     try:
         setattr(object, entry["identifier"], value)
     except AttributeError:
